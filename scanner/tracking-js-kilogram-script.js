@@ -18,6 +18,7 @@ function tracking_start() {
   tracker.setMinDimension(5);
   tracker.on("track", function(event) {
     var head_start_pos = 0;
+    let start = 0;
     event.data.forEach(function(rect) {
       // Y to start scanning
       if (rect.y > 100) {
@@ -30,8 +31,10 @@ function tracking_start() {
             x: rect.x,
             y: rect.y,
             height: rect.height,
-            width: rect.width
+            width: rect.width,
+            start: start
           });
+          start = start + 5;
         } else {
           total_mark++;
         }
@@ -47,30 +50,35 @@ function tracking_start() {
     container.appendChild(rect);
     head_pos.forEach(pos => {
       let answer_holder = { no: null, answer: null };
-      //Loop through total of answer available
-      for (i = 1; i <= 5; i++) {
-        let from_x = pos.x + pos.width * i;
-        let to_x = pos.x + pos.width * (i + 1);
-        let center_x = x + w / 2;
-        if (center_x >= from_x && center_x <= to_x) {
-          rect.innerHTML = answer[i];
-          answer_holder.answer = answer[i];
-          break;
+      if (
+        x + w / 2 >= pos.x + pos.width &&
+        x + w / 2 <= pos.x + pos.width * 6
+      ) {
+        //Loop through total of answer available
+        for (i = 1; i <= 5; i++) {
+          let from_x = pos.x + pos.width * i;
+          let to_x = pos.x + pos.width * (i + 1);
+          let center_x = x + w / 2;
+          if (center_x >= from_x && center_x <= to_x) {
+            rect.innerHTML = answer[i];
+            answer_holder.answer = answer[i];
+            break;
+          }
         }
-      }
-      //Loop through total quesion
-      for (i = 1; i <= 5; i++) {
-        let from_y = pos.y + pos.height * i;
-        let to_y = pos.y + pos.height * (i + 1);
-        let center_y = y + h / 2;
-        if (center_y >= from_y && center_y <= to_y) {
-          rect.innerHTML = rect.innerHTML + i;
-          answer_holder.no = i;
-          break;
+        //Loop through total quesion
+        for (i = 1; i <= 5; i++) {
+          let from_y = pos.y + pos.height * i;
+          let to_y = pos.y + pos.height * (i + 1);
+          let center_y = y + h / 2;
+          if (center_y >= from_y && center_y <= to_y) {
+            rect.innerHTML = rect.innerHTML + (pos.start + i);
+            answer_holder.no = pos.start + i;
+            break;
+          }
         }
-      }
-      if (answer_holder.no != null && answer_holder.answer != null) {
-        summary.push(answer_holder);
+        if (answer_holder.no != null && answer_holder.answer != null) {
+          summary.push(answer_holder);
+        }
       }
     });
     rect.style.color = "red";
