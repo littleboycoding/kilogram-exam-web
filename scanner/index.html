@@ -6,11 +6,7 @@
 		<script src="tracking-min.js"></script>
 		<style>
 			.rect {
-				width: 80px;
-				height: 80px;
 				position: absolute;
-				left: -1000px;
-				top: -1000px;
 			}
 		</style>
 	</head>
@@ -34,15 +30,18 @@
 				}
 				return false
 			});
-
 			var tracker = new tracking.ColorTracker(['black']);
-			tracker.setMinDimension(2)
+			tracker.setMinDimension(6)
 
+			var total_mark = 0;
 			tracker.on('track', function(event) {
 				event.data.forEach(function(rect) {
-				  window.plot(rect.x, rect.y, rect.width, rect.height, rect.color);
+					if (rect.y > 150) {
+					window.plot(rect.x, rect.y, rect.width, rect.height, rect.color);
+					total_mark++;
+					}
 				});
-				console.log("Total Mark : " + event.data.length);
+				console.log("Total Mark : " + total_mark);
 			});
 
 			tracking.track(exam, tracker);
@@ -50,6 +49,7 @@
 			window.plot = function(x, y, w, h, color) {
 				var rect = document.createElement('div');
 				container.appendChild(rect);
+				//rect.innerHTML = x + " " + y;
 				rect.classList.add('rect');
 				rect.style.border = '2px solid ' + color;
 				rect.style.width = w + 'px';
