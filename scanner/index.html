@@ -4,59 +4,22 @@
 		<title>Kilogram Exam</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<script src="tracking-min.js"></script>
+		<script src="tracking-js-kilogram-script.js"></script>
 		<style>
 			.rect {
 				position: absolute;
 			}
+			body {
+				background-color: #CCC;
+				margin: 0;
+			}
 		</style>
 	</head>
-	<body>
+	<body onload="tracking_start()">
 		<center>
 			<div class="container">
-				<img id="exam" src="exam.png">
+				<img id="exam" src="exam_2.png">
 			</div>
 		</center>
 	</body>
-	<script>
-		window.onload = function() {
-			//Once page loaded
-			console.log("Page loaded");
-			var exam = document.querySelector("#exam");
-			var container = document.querySelector(".container");
-
-			tracking.ColorTracker.registerColor('black', function(r, g, b) {
-				if (r <= 130 && g <= 130 && b <= 130) {
-					return true
-				}
-				return false
-			});
-			var tracker = new tracking.ColorTracker(['black']);
-			tracker.setMinDimension(6)
-
-			var total_mark = 0;
-			tracker.on('track', function(event) {
-				event.data.forEach(function(rect) {
-					if (rect.y > 150) {
-					window.plot(rect.x, rect.y, rect.width, rect.height, rect.color);
-					total_mark++;
-					}
-				});
-				console.log("Total Mark : " + total_mark);
-			});
-
-			tracking.track(exam, tracker);
-
-			window.plot = function(x, y, w, h, color) {
-				var rect = document.createElement('div');
-				container.appendChild(rect);
-				//rect.innerHTML = x + " " + y;
-				rect.classList.add('rect');
-				rect.style.border = '2px solid ' + color;
-				rect.style.width = w + 'px';
-				rect.style.height = h + 'px';
-				rect.style.left = (exam.offsetLeft + x) + 'px';
-				rect.style.top = (exam.offsetTop + y) + 'px';
-			};
-		}
-	</script>
 </html>
