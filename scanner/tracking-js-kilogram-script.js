@@ -1,8 +1,12 @@
 function tracking_start() {
-  var exam = document.querySelector("#exam");
-  var container = document.querySelector(".container");
+  const exam = document.querySelector("#exam");
+  const container = document.querySelector(".container");
+  const answer = [null, "A", "B", "C", "D", "E"];
+  const question_multipler = 5;
+  const answer_available = 5;
+  const y_tostartfrom = 100;
+
   var summary = [];
-  var answer = [null, "A", "B", "C", "D", "E"];
   var total_mark = 0;
   var head_pos = [];
 
@@ -14,14 +18,14 @@ function tracking_start() {
     return false;
   });
 
-  var tracker = new tracking.ColorTracker(["black"]);
+  const tracker = new tracking.ColorTracker(["black"]);
   tracker.setMinDimension(5);
   tracker.on("track", function(event) {
-    var head_start_pos = 0;
+    let head_start_pos = 0;
     let start = 0;
     event.data.forEach(function(rect) {
       // Y to start scanning
-      if (rect.y > 100) {
+      if (rect.y > y_tostartfrom) {
         //First match always be starting position
         if (head_start_pos == 0) {
           head_start_pos = rect.y;
@@ -34,7 +38,7 @@ function tracking_start() {
             width: rect.width,
             start: start
           });
-          start = start + 5;
+          start = start + question_multipler;
         } else {
           total_mark++;
         }
@@ -52,10 +56,10 @@ function tracking_start() {
       let answer_holder = { no: null, answer: null };
       if (
         x + w / 2 >= pos.x + pos.width &&
-        x + w / 2 <= pos.x + pos.width * 6
+        x + w / 2 <= pos.x + pos.width * (answer_available + 1)
       ) {
         //Loop through total of answer available
-        for (i = 1; i <= 5; i++) {
+        for (let i = 1; i <= answer_available; i++) {
           let from_x = pos.x + pos.width * i;
           let to_x = pos.x + pos.width * (i + 1);
           let center_x = x + w / 2;
@@ -66,7 +70,7 @@ function tracking_start() {
           }
         }
         //Loop through total quesion
-        for (i = 1; i <= 5; i++) {
+        for (let i = 1; i <= question_multipler; i++) {
           let from_y = pos.y + pos.height * i;
           let to_y = pos.y + pos.height * (i + 1);
           let center_y = y + h / 2;
