@@ -4,7 +4,8 @@
   "description": "the exam sheet creator and checker via scanning in one solution !",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node index.js",
+    "watcher": "npx babel --watch src --out-dir component/ --presets react-app/prod"
   },
   "repository": {
     "type": "git",
