@@ -20,7 +20,6 @@
   "dependencies": {
     "babel-cli": "^6.26.0",
     "babel-preset-react-app": "^3.1.2",
-    "electron-oauth2": "^3.0.0",
     "googleapis": "^39.2.0"
   },
   "devDependencies": {
