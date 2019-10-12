@@ -4,7 +4,7 @@
   "description": "the exam sheet creator and checker via scanning in one solution !",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "electron .",
     "watcher": "npx babel --watch src --out-dir component/ --presets react-app/prod"
   },
   "repository": {
@@ -19,6 +19,11 @@
   "homepage": "https://github.com/littleboycoding/kilogram-exam#readme",
   "dependencies": {
     "babel-cli": "^6.26.0",
-    "babel-preset-react-app": "^3.1.2"
+    "babel-preset-react-app": "^3.1.2",
+    "electron-oauth2": "^3.0.0",
+    "googleapis": "^39.2.0"
+  },
+  "devDependencies": {
+    "electron": "^6.0.12"
   }
 }
