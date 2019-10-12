@@ -40,32 +40,24 @@ function createWindow() {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow.show();
-    fs.readFile("credentials.json", (err, data) => {
-      const credentials = JSON.parse(data);
-      fs.readFile(TOKEN, async function(err, data) {
-        if (!err) {
-          const {
-            client_secret,
-            client_id,
-            redirect_uris
-          } = credentials.installed;
-          oauth2 = new google.auth.OAuth2(
-            client_id,
-            client_secret,
-            redirect_uris[1]
-          );
-          oauth2.setCredentials(JSON.parse(data));
-          server.close(
-            mainWindow.webContents.send("signInSuccess"),
-            mainWindow.webContents.send("userInfo", await getProfile())
-          );
-        }
-      });
+    fs.readFile(TOKEN, async function(err, data) {
+      if (!err) {
+        oauth2.setCredentials(JSON.parse(data));
+        server.close(
+          mainWindow.webContents.send("signInSuccess"),
+          mainWindow.webContents.send("userInfo", await getProfile())
+        );
+      }
     });
   });
 }
 
 app.on("ready", () => {
+  fs.readFile("credentials.json", (err, data) => {
+    const credentials = JSON.parse(data);
+    const { client_secret, client_id, redirect_uris } = credentials.installed;
+    oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
+  });
   createWindow();
 });
 
@@ -74,24 +66,15 @@ ipcMain.on("googleSignin", (event, arg) => {
 });
 
 function googleSignin() {
-  fs.readFile("credentials.json", (err, data) => {
-    const credentials = JSON.parse(data);
-    const { client_secret, client_id, redirect_uris } = credentials.installed;
-    oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
-    fs.readFile(TOKEN, async function(err, data) {
-      if (err) {
-        const authUrl = oauth2.generateAuthUrl({
-          access_type: "offline",
-          scope: [
-            "https://www.googleapis.com/auth/drive.appfolder",
-            "https://www.googleapis.com/auth/userinfo.email",
-            "https://www.googleapis.com/auth/userinfo.profile"
-          ]
-        });
-        dialogSignin(authUrl);
-      }
-    });
+  const authUrl = oauth2.generateAuthUrl({
+    access_type: "offline",
+    scope: [
+      "https://www.googleapis.com/auth/drive.appfolder",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
   });
+  dialogSignin(authUrl);
 }
 
 function getProfile() {
