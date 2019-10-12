@@ -1,11 +1,35 @@
 const { ipcRenderer } = require("electron");
+const { google } = require("googleapis");
 
-function Account(props) {
-  return (
-    <span id="account">
-      <span id="account_detail"></span>
-    </span>
-  );
+class Account extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      userImage: null,
+      displayName: null,
+      email: null
+    };
+    ipcRenderer.on("userInfo", (event, res) => {
+      this.setState({
+        userImage: res.data.photos[0].url,
+        displayName: res.data.names[0].displayName,
+        email: res.data.emailAddresses[0].value
+      });
+    });
+  }
+
+  render() {
+    return (
+      <span id="account">
+        <img
+          style={{ height: "20px", borderRadius: "50%" }}
+          align="center"
+          src={this.state.userImage}
+        />
+        <span id="account_detail"> {this.state.displayName}</span>
+      </span>
+    );
+  }
 }
 
 function Header(props) {
@@ -115,15 +139,11 @@ class Container extends React.Component {
         </Dialog>
       )
     };
-    this.signInSuccess = this.signInSuccess.bind(this);
-    ipcRenderer.once("signInSuccess", (event, code) => {
-      this.signInSuccess(code);
-    });
-  }
-
-  signInSuccess(code) {
-    this.setState({
-      dialogShown: false
+    ipcRenderer.on("signInSuccess", event => {
+      console.log(event);
+      this.setState({
+        dialogShown: false
+      });
     });
   }
 
