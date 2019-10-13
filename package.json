@@ -2,7 +2,7 @@
   "name": "kilogram-exam",
   "version": "1.0.0",
   "description": "the exam sheet creator and checker via scanning in one solution !",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "start": "electron .",
     "watcher": "npx babel --watch src --out-dir component/ --presets react-app/prod"
