@@ -26,6 +26,7 @@ var mainWindow;
 var dialogSigninWindow;
 var oauth2;
 var server;
+var drive;
 
 /*
  * createWindow()
@@ -54,9 +55,112 @@ function createWindow() {
         oauth2.setCredentials(JSON.parse(data));
         mainWindow.webContents.send("signInSuccess");
         mainWindow.webContents.send("userInfo", await getProfile());
+        initializeData();
       }
     });
   });
+}
+/*
+ * initializeData()
+ * Check if there are already has file fileID.json if yes then leave, if no, check if already created on drive, if not create new one on drive then save into fileID.json on root directory, if already has on drive then save into fileID.json on root directory.
+ *
+ */
+
+function initializeData() {
+  fs.readFile("fileID.json", async function(err, data) {
+    if (err) {
+      drive.files.list(
+        {
+          spaces: "appDataFolder",
+          fields: "nextPageToken, files(id, name)",
+          pageSize: 100
+        },
+        (err, res) => {
+          if (err) {
+            console.log(err);
+          } else {
+            if (res.data.files.length > 0) {
+              console.log(
+                "Found a file on Google drive fetching it into fileID.json ",
+                res.data.files[0]
+              );
+              fs.writeFile(
+                "fileID.json",
+                JSON.stringify(res.data.files[0]),
+                err => console.log(err)
+              );
+            } else {
+              console.log("File not found on Google drive, creating new one");
+
+              var fileMetadata = {
+                name: "question.json",
+                parents: ["appDataFolder"]
+              };
+              var media = {
+                mimeType: "application/json",
+                body: JSON.stringify({
+                  question1: "No it's doesn't wrong at all !",
+                  question2: "Yes, you did wrong"
+                })
+              };
+              drive.files.create(
+                {
+                  resource: fileMetadata,
+                  media: media,
+                  fields: "id"
+                },
+                function(err, res) {
+                  if (err) {
+                    console.error(err);
+                  } else {
+                    console.log("File Id: ", res.data.id);
+                    fs.writeFile(
+                      "fileID.json",
+                      JSON.stringify({
+                        id: res.data.id,
+                        name: "question.json"
+                      }),
+                      err => console.log(err)
+                    );
+                  }
+                }
+              );
+            }
+          }
+        }
+      );
+    } else {
+      response = await getData(data);
+      console.log(response);
+    }
+  });
+}
+
+/*
+ * getData(String: data)
+ * fetch data from given file id
+ * Return: object response
+ */
+
+async function getData(data) {
+  const fileID = JSON.parse(data);
+  const fileRes = new Promise((resolve, reject) => {
+    drive.files.get(
+      {
+        fileId: fileID.id,
+        alt: "media"
+      },
+      (err, res) => {
+        if (err) {
+          console.log(err);
+          reject(err);
+        } else {
+          resolve(res.data);
+        }
+      }
+    );
+  });
+  return fileRes;
 }
 
 //On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
@@ -65,6 +169,10 @@ app.on("ready", () => {
     const credentials = JSON.parse(data);
     const { client_secret, client_id, redirect_uris } = credentials.installed;
     oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
+    drive = google.drive({
+      version: "v3",
+      auth: oauth2
+    });
   });
   createWindow();
 });
