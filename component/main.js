@@ -12,6 +12,9 @@ var _require = require("electron"),
 var _require2 = require("googleapis"),
     google = _require2.google;
 
+var _require3 = require("./drive"),
+    driveGet = _require3.driveGet;
+
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
 
@@ -65,11 +68,11 @@ function Header(props) {
     { id: "header" },
     props.value,
     " ",
-    React.createElement(Account, { name: "Thanwat Yodnil" })
+    React.createElement(Account, null)
   );
 }
 
-function Sidebar_BT(props) {
+function Sidebar_Button(props) {
   return React.createElement(
     "div",
     {
@@ -83,59 +86,28 @@ function Sidebar_BT(props) {
   );
 }
 
-var menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
-
-var Sidebar = function (_React$Component2) {
-  _inherits(Sidebar, _React$Component2);
-
-  function Sidebar(props) {
-    _classCallCheck(this, Sidebar);
-
-    var _this2 = _possibleConstructorReturn(this, (Sidebar.__proto__ || Object.getPrototypeOf(Sidebar)).call(this, props));
-
-    _this2.state = {
-      menu_list: menu,
-      active: menu[0]
-    };
-    _this2.handleClick = _this2.handleClick.bind(_this2);
-    return _this2;
-  }
-
-  _createClass(Sidebar, [{
-    key: "handleClick",
-    value: function handleClick(actived_menu) {
-      this.setState({
-        active: actived_menu
+function Sidebar(props) {
+  return React.createElement(
+    "div",
+    { id: "sidebar" },
+    props.menuList.map(function (menu) {
+      return React.createElement(Sidebar_Button, {
+        key: menu,
+        name: menu,
+        onClick: function onClick() {
+          return props.onClick(menu);
+        },
+        className: menu == props.activePage ? "actived" : "not-active"
       });
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      var _this3 = this;
-
-      return React.createElement(
-        "div",
-        { id: "sidebar" },
-        this.state.menu_list.map(function (menu) {
-          return React.createElement(Sidebar_BT, {
-            key: menu,
-            name: menu,
-            onClick: _this3.handleClick,
-            className: menu == _this3.state.active ? "actived" : "not-active"
-          });
-        })
-      );
-    }
-  }]);
-
-  return Sidebar;
-}(React.Component);
+    })
+  );
+}
 
 function Content(props) {
   return React.createElement(
     "div",
     { id: "content" },
-    React.createElement(Header, { value: "Home" })
+    React.createElement(Header, { value: props.activePage })
   );
 }
 
@@ -151,58 +123,62 @@ function Dialog(props) {
   );
 }
 
-var SignIn_BT = function (_React$Component3) {
-  _inherits(SignIn_BT, _React$Component3);
+var SignIn_Button = function (_React$Component2) {
+  _inherits(SignIn_Button, _React$Component2);
 
-  function SignIn_BT(props) {
-    _classCallCheck(this, SignIn_BT);
+  function SignIn_Button(props) {
+    _classCallCheck(this, SignIn_Button);
 
-    var _this4 = _possibleConstructorReturn(this, (SignIn_BT.__proto__ || Object.getPrototypeOf(SignIn_BT)).call(this, props));
+    var _this2 = _possibleConstructorReturn(this, (SignIn_Button.__proto__ || Object.getPrototypeOf(SignIn_Button)).call(this, props));
 
-    _this4.state = {
+    _this2.state = {
       hovering: false
     };
-    return _this4;
+    return _this2;
   }
 
-  _createClass(SignIn_BT, [{
+  _createClass(SignIn_Button, [{
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this3 = this;
 
       return React.createElement("img", {
         className: "hover_pointer",
         onMouseOver: function onMouseOver() {
-          return _this5.setState({ hovering: true });
+          return _this3.setState({ hovering: true });
         },
         onMouseOut: function onMouseOut() {
-          return _this5.setState({ hovering: false });
+          return _this3.setState({ hovering: false });
         },
         onClick: function onClick() {
-          ipcRenderer.send(_this5.props.signinMethod);
+          ipcRenderer.send(_this3.props.signinMethod);
         },
         src: !this.state.hovering ? this.props.src : this.props.srcHover
       });
     }
   }]);
 
-  return SignIn_BT;
+  return SignIn_Button;
 }(React.Component);
 
-var Container = function (_React$Component4) {
-  _inherits(Container, _React$Component4);
+var menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
+
+var Container = function (_React$Component3) {
+  _inherits(Container, _React$Component3);
 
   function Container(props) {
     _classCallCheck(this, Container);
 
-    var _this6 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
+    var _this4 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
 
-    _this6.state = {
+    _this4.state = {
+      menuList: menu,
+      activePage: null,
       dialogShown: true,
       dialogContent: React.createElement(
         Dialog,
         null,
-        React.createElement(SignIn_BT, {
+        React.createElement(SignIn_Button, {
           src: "google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png",
           srcHover: "google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png",
           signinMethod: "googleSignin"
@@ -210,23 +186,35 @@ var Container = function (_React$Component4) {
       )
     };
     ipcRenderer.on("signInSuccess", function (event) {
-      console.log(event);
-      _this6.setState({
-        dialogShown: false
+      _this4.setState({
+        dialogShown: false,
+        activePage: _this4.state.menuList[0]
       });
     });
-    return _this6;
+    _this4.handleClick = _this4.handleClick.bind(_this4);
+    return _this4;
   }
 
   _createClass(Container, [{
+    key: "handleClick",
+    value: function handleClick(activeNum) {
+      this.setState({
+        activePage: activeNum
+      });
+    }
+  }, {
     key: "render",
     value: function render() {
       return React.createElement(
         "div",
         { id: "container" },
         this.state.dialogShown ? this.state.dialogContent : null,
-        React.createElement(Sidebar, null),
-        React.createElement(Content, null)
+        React.createElement(Sidebar, {
+          activePage: this.state.activePage,
+          onClick: this.handleClick,
+          menuList: this.state.menuList
+        }),
+        React.createElement(Content, { activePage: this.state.activePage })
       );
     }
   }]);

@@ -53,9 +53,9 @@ function createWindow() {
     fs.readFile(TOKEN, async function(err, data) {
       if (!err) {
         oauth2.setCredentials(JSON.parse(data));
+        await initializeData();
         mainWindow.webContents.send("signInSuccess");
         mainWindow.webContents.send("userInfo", await getProfile());
-        initializeData();
       }
     });
   });
@@ -82,99 +82,25 @@ function initializeData() {
             if (res.data.files.length > 0) {
               console.log(
                 "Found a file on Google drive fetching it into fileID.json ",
-                res.data.files[0]
+                res.data.files
               );
-              fs.writeFile(
-                "fileID.json",
-                JSON.stringify(res.data.files[0]),
-                err => console.log(err)
+              let fileUploaded = {};
+              res.data.files.forEach(x => {
+                fileUploaded[x.name] = x.id;
+              });
+              fs.writeFile("fileID.json", JSON.stringify(fileUploaded), err =>
+                console.log(err)
               );
             } else {
               console.log("File not found on Google drive, creating new one");
-
-              var fileMetadata = {
-                name: "question.json",
-                parents: ["appDataFolder"]
-              };
-              var media = {
-                mimeType: "application/json",
-                body: JSON.stringify({
-                  question1: "No it's doesn't wrong at all !",
-                  question2: "Yes, you did wrong"
-                })
-              };
-              drive.files.create(
-                {
-                  resource: fileMetadata,
-                  media: media,
-                  fields: "id"
-                },
-                function(err, res) {
-                  if (err) {
-                    console.error(err);
-                  } else {
-                    console.log("File Id: ", res.data.id);
-                    fs.writeFile(
-                      "fileID.json",
-                      JSON.stringify({
-                        id: res.data.id,
-                        name: "question.json"
-                      }),
-                      err => console.log(err)
-                    );
-                  }
-                }
-              );
+              require("./createFile").createInitialFile(drive);
             }
           }
         }
       );
-    } else {
-      let result;
-      await getData(data)
-        .then(res => {
-          result = res.data;
-        })
-        .catch(err => console.log(err));
-
-      for (const key of Object.keys(result)) {
-        console.log(result[key]);
-      }
     }
   });
 }
-
-/*
- * getData(String: data)
- * fetch data from given file id
- * Return: Promise
- */
-
-function getData(data) {
-  const fileID = JSON.parse(data);
-  return drive.files.get({
-    fileId: fileID.id,
-    alt: "media"
-  });
-}
-
-//On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
-app.on("ready", () => {
-  fs.readFile("credentials.json", (err, data) => {
-    const credentials = JSON.parse(data);
-    const { client_secret, client_id, redirect_uris } = credentials.installed;
-    oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
-    drive = google.drive({
-      version: "v3",
-      auth: oauth2
-    });
-  });
-  createWindow();
-});
-
-ipcMain.on("googleSignin", (event, arg) => {
-  googleSignin();
-});
 
 /*
  * googleSignin()
@@ -206,6 +132,7 @@ function createHTTPServer() {
       });
       dialogSigninWindow.close();
       server.close(
+        await initializeData(),
         mainWindow.webContents.send("signInSuccess"),
         mainWindow.webContents.send("userInfo", await getProfile())
       );
@@ -253,3 +180,40 @@ function dialogSignin(url) {
   }
   dialogSigninWindow.loadURL(url);
 }
+
+/*
+ * getData(String: data)
+ * fetch data from given file id
+ * Return: Promise
+ */
+
+function getData(data) {
+  return drive.files.get({
+    fileId: data,
+    alt: "media"
+  });
+}
+
+//On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
+app.on("ready", () => {
+  fs.readFile("credentials.json", (err, data) => {
+    const credentials = JSON.parse(data);
+    const { client_secret, client_id, redirect_uris } = credentials.installed;
+    oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
+    drive = google.drive({
+      version: "v3",
+      auth: oauth2
+    });
+  });
+  createWindow();
+});
+
+ipcMain.on("googleSignin", (event, arg) => {
+  googleSignin();
+});
+
+ipcMain.on("driveGet", (event, data) => {
+  getData(data).then(res => {
+    event.reply("driveRes", res);
+  });
+});

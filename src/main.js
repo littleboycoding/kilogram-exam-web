@@ -1,5 +1,6 @@
 const { ipcRenderer } = require("electron");
 const { google } = require("googleapis");
+const { driveGet } = require("./drive");
 
 class Account extends React.Component {
   constructor(props) {
@@ -35,12 +36,12 @@ class Account extends React.Component {
 function Header(props) {
   return (
     <div id="header">
-      {props.value} <Account name="Thanwat Yodnil" />
+      {props.value} <Account />
     </div>
   );
 }
 
-function Sidebar_BT(props) {
+function Sidebar_Button(props) {
   return (
     <div
       className={"sidebar_bt " + props.className}
@@ -51,44 +52,25 @@ function Sidebar_BT(props) {
   );
 }
 
-const menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
-
-class Sidebar extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      menu_list: menu,
-      active: menu[0]
-    };
-    this.handleClick = this.handleClick.bind(this);
-  }
-
-  handleClick(actived_menu) {
-    this.setState({
-      active: actived_menu
-    });
-  }
-
-  render() {
-    return (
-      <div id="sidebar">
-        {this.state.menu_list.map(menu => (
-          <Sidebar_BT
-            key={menu}
-            name={menu}
-            onClick={this.handleClick}
-            className={menu == this.state.active ? "actived" : "not-active"}
-          />
-        ))}
-      </div>
-    );
-  }
+function Sidebar(props) {
+  return (
+    <div id="sidebar">
+      {props.menuList.map(menu => (
+        <Sidebar_Button
+          key={menu}
+          name={menu}
+          onClick={() => props.onClick(menu)}
+          className={menu == props.activePage ? "actived" : "not-active"}
+        />
+      ))}
+    </div>
+  );
 }
 
 function Content(props) {
   return (
     <div id="content">
-      <Header value="Home" />
+      <Header value={props.activePage} />
     </div>
   );
 }
@@ -101,7 +83,7 @@ function Dialog(props) {
   );
 }
 
-class SignIn_BT extends React.Component {
+class SignIn_Button extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -124,14 +106,17 @@ class SignIn_BT extends React.Component {
   }
 }
 
+const menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
 class Container extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      menuList: menu,
+      activePage: null,
       dialogShown: true,
       dialogContent: (
         <Dialog>
-          <SignIn_BT
+          <SignIn_Button
             src="google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png"
             srcHover="google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png"
             signinMethod="googleSignin"
@@ -140,10 +125,17 @@ class Container extends React.Component {
       )
     };
     ipcRenderer.on("signInSuccess", event => {
-      console.log(event);
       this.setState({
-        dialogShown: false
+        dialogShown: false,
+        activePage: this.state.menuList[0]
       });
+    });
+    this.handleClick = this.handleClick.bind(this);
+  }
+
+  handleClick(activeNum) {
+    this.setState({
+      activePage: activeNum
     });
   }
 
@@ -151,8 +143,12 @@ class Container extends React.Component {
     return (
       <div id="container">
         {this.state.dialogShown ? this.state.dialogContent : null}
-        <Sidebar />
-        <Content />
+        <Sidebar
+          activePage={this.state.activePage}
+          onClick={this.handleClick}
+          menuList={this.state.menuList}
+        />
+        <Content activePage={this.state.activePage} />
       </div>
     );
   }
