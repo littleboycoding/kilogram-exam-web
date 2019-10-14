@@ -67,7 +67,7 @@ function createWindow() {
  */
 
 function initializeData() {
-  fs.readFile("fileID.json", async function(err, data) {
+  fs.readFile("fileID.json", async (err, data) => {
     if (err) {
       drive.files.list(
         {
@@ -130,8 +130,16 @@ function initializeData() {
         }
       );
     } else {
-      response = await getData(data);
-      console.log(response);
+      let result;
+      await getData(data)
+        .then(res => {
+          result = res.data;
+        })
+        .catch(err => console.log(err));
+
+      for (const key of Object.keys(result)) {
+        console.log(result[key]);
+      }
     }
   });
 }
@@ -139,28 +147,15 @@ function initializeData() {
 /*
  * getData(String: data)
  * fetch data from given file id
- * Return: object response
+ * Return: Promise
  */
 
-async function getData(data) {
+function getData(data) {
   const fileID = JSON.parse(data);
-  const fileRes = new Promise((resolve, reject) => {
-    drive.files.get(
-      {
-        fileId: fileID.id,
-        alt: "media"
-      },
-      (err, res) => {
-        if (err) {
-          console.log(err);
-          reject(err);
-        } else {
-          resolve(res.data);
-        }
-      }
-    );
+  return drive.files.get({
+    fileId: fileID.id,
+    alt: "media"
   });
-  return fileRes;
 }
 
 //On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
