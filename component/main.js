@@ -15,6 +15,9 @@ var _require2 = require("googleapis"),
 var _require3 = require("./drive"),
     driveGet = _require3.driveGet;
 
+var _require4 = require("./component/questionComponent.js"),
+    QuestionPage = _require4.QuestionPage;
+
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
 
@@ -87,19 +90,52 @@ function Sidebar_Button(props) {
 }
 
 function Sidebar(props) {
+  function eachPageButton(menuList, props) {
+    var menu = [];
+
+    var _loop = function _loop(key) {
+      menu.push(React.createElement(Sidebar_Button, {
+        key: key,
+        name: key,
+        onClick: function onClick() {
+          return props.onClick(key);
+        },
+        className: key == props.activePage ? "actived" : "not-active"
+      }));
+    };
+
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = Object.keys(menuList)[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var key = _step.value;
+
+        _loop(key);
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return menu;
+  }
+
   return React.createElement(
     "div",
     { id: "sidebar" },
-    props.menuList.map(function (menu) {
-      return React.createElement(Sidebar_Button, {
-        key: menu,
-        name: menu,
-        onClick: function onClick() {
-          return props.onClick(menu);
-        },
-        className: menu == props.activePage ? "actived" : "not-active"
-      });
-    })
+    eachPageButton(props.menuList, props)
   );
 }
 
@@ -107,7 +143,8 @@ function Content(props) {
   return React.createElement(
     "div",
     { id: "content" },
-    React.createElement(Header, { value: props.activePage })
+    React.createElement(Header, { value: props.activePage }),
+    props.menuList[props.activePage]["page"]
   );
 }
 
@@ -161,7 +198,12 @@ var SignIn_Button = function (_React$Component2) {
   return SignIn_Button;
 }(React.Component);
 
-var menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
+var menu = {
+  หน้าแรก: { page: null },
+  ข้อสอบ: { page: React.createElement(QuestionPage, null) },
+  นักเรียน: { page: null },
+  สรุป: { page: null }
+};
 
 var Container = function (_React$Component3) {
   _inherits(Container, _React$Component3);
@@ -173,7 +215,7 @@ var Container = function (_React$Component3) {
 
     _this4.state = {
       menuList: menu,
-      activePage: null,
+      activePage: Object.keys(menu)[0],
       dialogShown: true,
       dialogContent: React.createElement(
         Dialog,
@@ -187,8 +229,7 @@ var Container = function (_React$Component3) {
     };
     ipcRenderer.on("signInSuccess", function (event) {
       _this4.setState({
-        dialogShown: false,
-        activePage: _this4.state.menuList[0]
+        dialogShown: false
       });
     });
     _this4.handleClick = _this4.handleClick.bind(_this4);
@@ -211,10 +252,13 @@ var Container = function (_React$Component3) {
         this.state.dialogShown ? this.state.dialogContent : null,
         React.createElement(Sidebar, {
           activePage: this.state.activePage,
-          onClick: this.handleClick,
-          menuList: this.state.menuList
+          menuList: this.state.menuList,
+          onClick: this.handleClick
         }),
-        React.createElement(Content, { activePage: this.state.activePage })
+        React.createElement(Content, {
+          activePage: this.state.activePage,
+          menuList: this.state.menuList
+        })
       );
     }
   }]);

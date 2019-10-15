@@ -144,7 +144,7 @@ function createHTTPServer() {
  * getProfile()
  * return object with user's info and request information (header, status etc)
  *
- * Usage : Must call this function with await to ensure you get the return (Because it return promise)
+ * Return : Promise with response data
  */
 
 function getProfile() {

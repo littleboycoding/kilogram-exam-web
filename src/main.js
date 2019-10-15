@@ -1,6 +1,7 @@
 const { ipcRenderer } = require("electron");
 const { google } = require("googleapis");
 const { driveGet } = require("./drive");
+const { QuestionPage } = require("./component/questionComponent.js");
 
 class Account extends React.Component {
   constructor(props) {
@@ -53,24 +54,29 @@ function Sidebar_Button(props) {
 }
 
 function Sidebar(props) {
-  return (
-    <div id="sidebar">
-      {props.menuList.map(menu => (
+  function eachPageButton(menuList, props) {
+    let menu = [];
+    for (const key of Object.keys(menuList)) {
+      menu.push(
         <Sidebar_Button
-          key={menu}
-          name={menu}
-          onClick={() => props.onClick(menu)}
-          className={menu == props.activePage ? "actived" : "not-active"}
+          key={key}
+          name={key}
+          onClick={() => props.onClick(key)}
+          className={key == props.activePage ? "actived" : "not-active"}
         />
-      ))}
-    </div>
-  );
+      );
+    }
+    return menu;
+  }
+
+  return <div id="sidebar">{eachPageButton(props.menuList, props)}</div>;
 }
 
 function Content(props) {
   return (
     <div id="content">
       <Header value={props.activePage} />
+      {props.menuList[props.activePage]["page"]}
     </div>
   );
 }
@@ -106,13 +112,18 @@ class SignIn_Button extends React.Component {
   }
 }
 
-const menu = ["หน้าแรก", "ข้อสอบ", "นักเรียน", "สรุป"];
+const menu = {
+  หน้าแรก: { page: null },
+  ข้อสอบ: { page: <QuestionPage /> },
+  นักเรียน: { page: null },
+  สรุป: { page: null }
+};
 class Container extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       menuList: menu,
-      activePage: null,
+      activePage: Object.keys(menu)[0],
       dialogShown: true,
       dialogContent: (
         <Dialog>
@@ -126,8 +137,7 @@ class Container extends React.Component {
     };
     ipcRenderer.on("signInSuccess", event => {
       this.setState({
-        dialogShown: false,
-        activePage: this.state.menuList[0]
+        dialogShown: false
       });
     });
     this.handleClick = this.handleClick.bind(this);
@@ -145,10 +155,13 @@ class Container extends React.Component {
         {this.state.dialogShown ? this.state.dialogContent : null}
         <Sidebar
           activePage={this.state.activePage}
+          menuList={this.state.menuList}
           onClick={this.handleClick}
+        />
+        <Content
+          activePage={this.state.activePage}
           menuList={this.state.menuList}
         />
-        <Content activePage={this.state.activePage} />
       </div>
     );
   }
