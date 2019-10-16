@@ -1,6 +1,8 @@
 const { ipcRenderer } = require("electron");
 const { google } = require("googleapis");
 const { driveGet } = require("./drive");
+
+// Component for each section of Kilogram Exam desktop
 const { QuestionPage } = require("./component/questionComponent.js");
 
 class Account extends React.Component {
@@ -61,7 +63,7 @@ function Sidebar(props) {
         <Sidebar_Button
           key={key}
           name={key}
-          onClick={() => props.onClick(key)}
+          onClick={() => props.onClick(key, props.menuList[key]["page"])}
           className={key == props.activePage ? "actived" : "not-active"}
         />
       );
@@ -72,11 +74,11 @@ function Sidebar(props) {
   return <div id="sidebar">{eachPageButton(props.menuList, props)}</div>;
 }
 
-function Content(props) {
+function ContentContainer(props) {
   return (
-    <div id="content">
+    <div id="content_container">
       <Header value={props.activePage} />
-      {props.menuList[props.activePage]["page"]}
+      <div className="content">{props.pageContent}</div>
     </div>
   );
 }
@@ -112,27 +114,40 @@ class SignIn_Button extends React.Component {
   }
 }
 
-const menu = {
-  หน้าแรก: { page: null },
-  ข้อสอบ: { page: <QuestionPage /> },
-  นักเรียน: { page: null },
-  สรุป: { page: null }
-};
 class Container extends React.Component {
   constructor(props) {
     super(props);
+
+    this.handleDialog = {
+      open: msg => {
+        this.setState({ dialogShown: true, dialogContent: msg });
+      },
+      close: res => {
+        this.setState({
+          dialogShown: false,
+          pageContent: res ? res : this.state.pageContent
+        });
+      }
+    };
+
+    this.menu = {
+      หน้าแรก: { page: null },
+      ข้อสอบ: { page: <QuestionPage handleDialog={this.handleDialog} /> },
+      นักเรียน: { page: null },
+      สรุป: { page: null }
+    };
+
     this.state = {
-      menuList: menu,
-      activePage: Object.keys(menu)[0],
+      menuList: this.menu,
+      activePage: Object.keys(this.menu)[0],
+      pageContent: this.menu[Object.keys(this.menu)[0]]["page"],
       dialogShown: true,
       dialogContent: (
-        <Dialog>
-          <SignIn_Button
-            src="google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png"
-            srcHover="google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png"
-            signinMethod="googleSignin"
-          />
-        </Dialog>
+        <SignIn_Button
+          src="google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png"
+          srcHover="google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png"
+          signinMethod="googleSignin"
+        />
       )
     };
     ipcRenderer.on("signInSuccess", event => {
@@ -140,26 +155,33 @@ class Container extends React.Component {
         dialogShown: false
       });
     });
+
     this.handleClick = this.handleClick.bind(this);
+    this.handleDialog.open = this.handleDialog.open.bind(this);
+    this.handleDialog.close = this.handleDialog.close.bind(this);
   }
 
-  handleClick(activeNum) {
+  handleClick(activeNum, page) {
     this.setState({
-      activePage: activeNum
+      activePage: activeNum,
+      pageContent: page
     });
   }
 
   render() {
     return (
       <div id="container">
-        {this.state.dialogShown ? this.state.dialogContent : null}
+        {this.state.dialogShown ? (
+          <Dialog>{this.state.dialogContent}</Dialog>
+        ) : null}
         <Sidebar
           activePage={this.state.activePage}
           menuList={this.state.menuList}
           onClick={this.handleClick}
         />
-        <Content
+        <ContentContainer
           activePage={this.state.activePage}
+          pageContent={this.state.pageContent}
           menuList={this.state.menuList}
         />
       </div>
