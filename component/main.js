@@ -15,6 +15,9 @@ var _require2 = require("googleapis"),
 var _require3 = require("./drive"),
     driveGet = _require3.driveGet;
 
+// Component for each section of Kilogram Exam desktop
+
+
 var _require4 = require("./component/questionComponent.js"),
     QuestionPage = _require4.QuestionPage;
 
@@ -98,7 +101,7 @@ function Sidebar(props) {
         key: key,
         name: key,
         onClick: function onClick() {
-          return props.onClick(key);
+          return props.onClick(key, props.menuList[key]["page"]);
         },
         className: key == props.activePage ? "actived" : "not-active"
       }));
@@ -139,12 +142,16 @@ function Sidebar(props) {
   );
 }
 
-function Content(props) {
+function ContentContainer(props) {
   return React.createElement(
     "div",
-    { id: "content" },
+    { id: "content_container" },
     React.createElement(Header, { value: props.activePage }),
-    props.menuList[props.activePage]["page"]
+    React.createElement(
+      "div",
+      { className: "content" },
+      props.pageContent
+    )
   );
 }
 
@@ -198,13 +205,6 @@ var SignIn_Button = function (_React$Component2) {
   return SignIn_Button;
 }(React.Component);
 
-var menu = {
-  หน้าแรก: { page: null },
-  ข้อสอบ: { page: React.createElement(QuestionPage, null) },
-  นักเรียน: { page: null },
-  สรุป: { page: null }
-};
-
 var Container = function (_React$Component3) {
   _inherits(Container, _React$Component3);
 
@@ -213,34 +213,54 @@ var Container = function (_React$Component3) {
 
     var _this4 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
 
+    _this4.handleDialog = {
+      open: function open(msg) {
+        _this4.setState({ dialogShown: true, dialogContent: msg });
+      },
+      close: function close(res) {
+        _this4.setState({
+          dialogShown: false,
+          pageContent: res ? res : _this4.state.pageContent
+        });
+      }
+    };
+
+    _this4.menu = {
+      หน้าแรก: { page: null },
+      ข้อสอบ: { page: React.createElement(QuestionPage, { handleDialog: _this4.handleDialog }) },
+      นักเรียน: { page: null },
+      สรุป: { page: null }
+    };
+
     _this4.state = {
-      menuList: menu,
-      activePage: Object.keys(menu)[0],
+      menuList: _this4.menu,
+      activePage: Object.keys(_this4.menu)[0],
+      pageContent: _this4.menu[Object.keys(_this4.menu)[0]]["page"],
       dialogShown: true,
-      dialogContent: React.createElement(
-        Dialog,
-        null,
-        React.createElement(SignIn_Button, {
-          src: "google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png",
-          srcHover: "google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png",
-          signinMethod: "googleSignin"
-        })
-      )
+      dialogContent: React.createElement(SignIn_Button, {
+        src: "google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png",
+        srcHover: "google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png",
+        signinMethod: "googleSignin"
+      })
     };
     ipcRenderer.on("signInSuccess", function (event) {
       _this4.setState({
         dialogShown: false
       });
     });
+
     _this4.handleClick = _this4.handleClick.bind(_this4);
+    _this4.handleDialog.open = _this4.handleDialog.open.bind(_this4);
+    _this4.handleDialog.close = _this4.handleDialog.close.bind(_this4);
     return _this4;
   }
 
   _createClass(Container, [{
     key: "handleClick",
-    value: function handleClick(activeNum) {
+    value: function handleClick(activeNum, page) {
       this.setState({
-        activePage: activeNum
+        activePage: activeNum,
+        pageContent: page
       });
     }
   }, {
@@ -249,14 +269,19 @@ var Container = function (_React$Component3) {
       return React.createElement(
         "div",
         { id: "container" },
-        this.state.dialogShown ? this.state.dialogContent : null,
+        this.state.dialogShown ? React.createElement(
+          Dialog,
+          null,
+          this.state.dialogContent
+        ) : null,
         React.createElement(Sidebar, {
           activePage: this.state.activePage,
           menuList: this.state.menuList,
           onClick: this.handleClick
         }),
-        React.createElement(Content, {
+        React.createElement(ContentContainer, {
           activePage: this.state.activePage,
+          pageContent: this.state.pageContent,
           menuList: this.state.menuList
         })
       );
