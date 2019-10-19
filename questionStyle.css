@@ -1,0 +1,70 @@
+/* 
+ * Stylesheet for questionComponent.js
+ * */
+
+.questionTitle {
+	background-color: #8AD10A;
+	font-weight: bold;
+	padding: 10px;
+	color: white;
+}
+.questionTotal {
+	background-color: rgba(145, 217, 11, 0.2);
+	padding: 10px;
+	color: #555;
+	border-bottom: 1px solid #DDD;
+}
+.dataBorder .Button {
+	display: inline-block;
+	float: right !important;
+	padding: 5px !important;
+	border-radius: 0;
+	padding-bottom: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+.questionAnswer {
+	background-color: white;
+	border-bottom: 1px solid #DDD;
+	margin-top: 0px;
+}
+.questionAnswer li {
+	border-bottom: 1px solid #DDD;
+}
+.questionInput {
+	width: 100%;
+	border: none;
+	padding: 10px;
+}
+.questionTitleInput {
+	background-color: rgba(0, 0, 0, 0.07);
+	border: none;
+	padding: 10px;
+	color: white;
+	font-weight: bold;
+	display: inline-block;
+	width: calc(100% - 33px - 50px);
+	font-size: 15px;
+}
+.OperateButton {
+	box-shadow: none;
+	height: 38px;
+	position: relative;
+	z-index: 1;
+}
+.OperateButton span {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+.CorrectButton {
+	height: 35px;
+	background-color: #8AD10A;
+	filter: saturate(0.04);
+	color: white;
+}
+.CorrectButton:hover, .Corrected {
+	filter: saturate(0.5);
+}

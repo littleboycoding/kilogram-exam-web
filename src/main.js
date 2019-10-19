@@ -1,6 +1,5 @@
 const { ipcRenderer } = require("electron");
 const { google } = require("googleapis");
-const { driveGet } = require("./drive");
 
 // Component for each section of Kilogram Exam desktop
 const { QuestionPage } = require("./component/questionComponent.js");
@@ -132,7 +131,9 @@ class Container extends React.Component {
 
     this.menu = {
       หน้าแรก: { page: null },
-      ข้อสอบ: { page: <QuestionPage handleDialog={this.handleDialog} /> },
+      ข้อสอบ: {
+        page: <QuestionPage handleDialog={this.handleDialog} />
+      },
       นักเรียน: { page: null },
       สรุป: { page: null }
     };

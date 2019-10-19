@@ -12,14 +12,11 @@ var _require = require("electron"),
 var _require2 = require("googleapis"),
     google = _require2.google;
 
-var _require3 = require("./drive"),
-    driveGet = _require3.driveGet;
-
 // Component for each section of Kilogram Exam desktop
 
 
-var _require4 = require("./component/questionComponent.js"),
-    QuestionPage = _require4.QuestionPage;
+var _require3 = require("./component/questionComponent.js"),
+    QuestionPage = _require3.QuestionPage;
 
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
@@ -227,7 +224,9 @@ var Container = function (_React$Component3) {
 
     _this4.menu = {
       หน้าแรก: { page: null },
-      ข้อสอบ: { page: React.createElement(QuestionPage, { handleDialog: _this4.handleDialog }) },
+      ข้อสอบ: {
+        page: React.createElement(QuestionPage, { handleDialog: _this4.handleDialog })
+      },
       นักเรียน: { page: null },
       สรุป: { page: null }
     };
