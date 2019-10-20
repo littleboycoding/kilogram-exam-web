@@ -9,7 +9,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var _require = require("../drive"),
-    driveGet = _require.driveGet;
+    driveGet = _require.driveGet,
+    driveUpdate = _require.driveUpdate;
 
 var CreateNewQuestion = function (_React$Component) {
   _inherits(CreateNewQuestion, _React$Component);
@@ -256,14 +257,59 @@ var QuestionEditPage = function (_React$Component3) {
       data: _this6.props.data[_this6.props.title]
     };
 
+    _this6.data = Object.assign({}, _this6.props.data);
     _this6.handleAnswerChange = _this6.handleAnswerChange.bind(_this6);
     _this6.handleTitleChange = _this6.handleTitleChange.bind(_this6);
     _this6.handleTab = _this6.handleTab.bind(_this6);
     _this6.addQuestion = _this6.addQuestion.bind(_this6);
+    _this6.handleCorrect = _this6.handleCorrect.bind(_this6);
+    _this6.handleDeleteQuestion = _this6.handleDeleteQuestion.bind(_this6);
+    _this6.handleSubmit = _this6.handleSubmit.bind(_this6);
     return _this6;
   }
 
   _createClass(QuestionEditPage, [{
+    key: "handleSubmit",
+    value: function handleSubmit() {
+      var _this7 = this;
+
+      this.props.handleDialog.open(React.createElement(
+        "div",
+        { style: { fontSize: 20, marginBottom: 15 } },
+        "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \uFC70"
+      ));
+      Object.defineProperty(this.data, this.props.title, {
+        value: Object.assign({}, this.state.data),
+        writable: true
+      });
+      driveUpdate("question.json", this.data).then(function (res) {
+        _this7.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this7.props.handleDialog }));
+      });
+    }
+  }, {
+    key: "handleDeleteQuestion",
+    value: function handleDeleteQuestion(question_no) {
+      var thisQuestion = Object.assign({}, this.state.data);
+      for (i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
+        console.log(i, Object.keys(thisQuestion)[i]);
+        Object.defineProperty(thisQuestion, i, Object.getOwnPropertyDescriptor(thisQuestion, Object.keys(thisQuestion)[i]));
+      }
+      var lastData = Object.keys(thisQuestion)[Object.keys(thisQuestion).length - 1];
+      delete thisQuestion[lastData];
+      this.setState({
+        data: thisQuestion
+      });
+    }
+  }, {
+    key: "handleCorrect",
+    value: function handleCorrect(question_no, choice) {
+      var thisQuestion = Object.assign({}, this.state.data);
+      thisQuestion[question_no]["correct"] = choice;
+      this.setState({
+        data: thisQuestion
+      });
+    }
+  }, {
     key: "handleTab",
     value: function handleTab(question_no, choice, event) {
       if (event.key === "Tab" && Object.keys(this.state.data).length == question_no && choice == 4) {
@@ -306,7 +352,7 @@ var QuestionEditPage = function (_React$Component3) {
   }, {
     key: "render",
     value: function render() {
-      var _this7 = this;
+      var _this8 = this;
 
       var examName = Object.keys(this.state.data);
       return React.createElement(
@@ -326,6 +372,7 @@ var QuestionEditPage = function (_React$Component3) {
           React.createElement(
             "div",
             {
+              onClick: this.handleSubmit,
               style: { marginTop: "-5px", borderRadius: 2 },
               className: "Button Primary"
             },
@@ -335,10 +382,10 @@ var QuestionEditPage = function (_React$Component3) {
             "div",
             {
               onClick: function onClick() {
-                if (_this7.props.data[_this7.props.title] != _this7.state.data) {
-                  _this7.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this7.props.handleDialog }));
+                if (_this8.props.data[_this8.props.title] != _this8.state.data) {
+                  _this8.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this8.props.handleDialog }));
                 } else {
-                  _this7.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this7.props.handleDialog }));
+                  _this8.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this8.props.handleDialog }));
                 }
               },
               style: { marginRight: 8, marginTop: "-5px", borderRadius: 2 },
@@ -348,7 +395,7 @@ var QuestionEditPage = function (_React$Component3) {
           )
         ),
         examName.map(function (question_no) {
-          var question = _this7.state.data[question_no];
+          var question = _this8.state.data[question_no];
           return React.createElement(
             "div",
             { className: "dataBorder", key: question_no },
@@ -362,18 +409,29 @@ var QuestionEditPage = function (_React$Component3) {
                 ".",
                 " "
               ),
-              React.createElement("input", {
+              React.createElement("textarea", {
                 className: "questionTitleInput",
-                value: question["title"],
                 onChange: function onChange() {
-                  return _this7.handleTitleChange(question_no, event);
+                  event.target.style.height = "";
+                  event.target.style.height = event.target.scrollHeight + "px";
+                  _this8.handleTitleChange(question_no, event);
                 },
+                onFocus: function onFocus() {
+                  event.target.style.height = "";
+                  event.target.style.height = event.target.scrollHeight + "px";
+                },
+                value: question["title"],
                 autoFocus: true,
                 placeholder: "\u0E04\u0E33\u0E16\u0E32\u0E21..."
               }),
               React.createElement(
                 "div",
-                { className: "Button Danger OperateButton" },
+                {
+                  onClick: function onClick() {
+                    return _this8.handleDeleteQuestion(question_no);
+                  },
+                  className: "Button Danger OperateButton"
+                },
                 React.createElement(
                   "span",
                   null,
@@ -382,10 +440,11 @@ var QuestionEditPage = function (_React$Component3) {
               )
             ),
             React.createElement(EditAnswer, {
+              handleCorrect: _this8.handleCorrect,
               question: question,
               question_no: question_no,
-              handleTab: _this7.handleTab,
-              handleChange: _this7.handleAnswerChange
+              handleTab: _this8.handleTab,
+              handleChange: _this8.handleAnswerChange
             })
           );
         }),
@@ -402,7 +461,6 @@ var QuestionEditPage = function (_React$Component3) {
 }(React.Component);
 
 function EditAnswer(props) {
-  console.log(props.question);
   return React.createElement(
     "ol",
     { className: "questionAnswer" },
@@ -410,10 +468,16 @@ function EditAnswer(props) {
       return React.createElement(
         "li",
         { key: choice },
-        React.createElement("input", {
+        React.createElement("textarea", {
           style: { width: "calc(100% - 50px)" },
           onChange: function onChange() {
-            return props.handleChange(props.question_no, choice, event);
+            event.target.style.height = "";
+            event.target.style.height = event.target.scrollHeight + "px";
+            props.handleChange(props.question_no, choice, event);
+          },
+          onFocus: function onFocus() {
+            event.target.style.height = "";
+            event.target.style.height = event.target.scrollHeight + "px";
           },
           className: "questionInput",
           type: "text",
@@ -433,7 +497,12 @@ function EditAnswer(props) {
           )
         ) : React.createElement(
           "div",
-          { className: "Button OperateButton CorrectButton" },
+          {
+            onClick: function onClick() {
+              props.handleCorrect(props.question_no, choice);
+            },
+            className: "Button OperateButton CorrectButton"
+          },
           React.createElement(
             "span",
             null,

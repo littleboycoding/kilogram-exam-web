@@ -194,6 +194,17 @@ function getData(data) {
   });
 }
 
+function updateData(fileName, data) {
+  return drive.files.update({
+    fileId: fileName,
+    uploadType: "media",
+    media: {
+      mimeType: "application/json",
+      body: data
+    }
+  });
+}
+
 //On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
 app.on("ready", () => {
   fs.readFile("credentials.json", (err, data) => {
@@ -212,8 +223,14 @@ ipcMain.on("googleSignin", (event, arg) => {
   googleSignin();
 });
 
+ipcMain.on("driveUpdate", (event, fileName, data) => {
+  updateData(fileName, data).then(res => {
+    event.reply("driveUpdateRes", res);
+  });
+});
+
 ipcMain.on("driveGet", (event, data) => {
   getData(data).then(res => {
-    event.reply("driveRes", res);
+    event.reply("driveGetRes", res);
   });
 });

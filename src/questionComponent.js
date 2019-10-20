@@ -1,4 +1,4 @@
-const { driveGet } = require("../drive");
+const { driveGet, driveUpdate } = require("../drive");
 
 class CreateNewQuestion extends React.Component {
   constructor(props) {
@@ -156,10 +156,59 @@ class QuestionEditPage extends React.Component {
       data: this.props.data[this.props.title]
     };
 
+    this.data = Object.assign({}, this.props.data);
     this.handleAnswerChange = this.handleAnswerChange.bind(this);
     this.handleTitleChange = this.handleTitleChange.bind(this);
     this.handleTab = this.handleTab.bind(this);
     this.addQuestion = this.addQuestion.bind(this);
+    this.handleCorrect = this.handleCorrect.bind(this);
+    this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  handleSubmit() {
+    this.props.handleDialog.open(
+      <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังส่งข้อมูล ﱰ</div>
+    );
+    Object.defineProperty(this.data, this.props.title, {
+      value: Object.assign({}, this.state.data),
+      writable: true
+    });
+    driveUpdate("question.json", this.data).then(res => {
+      this.props.handleDialog.close(
+        <QuestionPage handleDialog={this.props.handleDialog} />
+      );
+    });
+  }
+
+  handleDeleteQuestion(question_no) {
+    let thisQuestion = Object.assign({}, this.state.data);
+    for (i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
+      console.log(i, Object.keys(thisQuestion)[i]);
+      Object.defineProperty(
+        thisQuestion,
+        i,
+        Object.getOwnPropertyDescriptor(
+          thisQuestion,
+          Object.keys(thisQuestion)[i]
+        )
+      );
+    }
+    const lastData = Object.keys(thisQuestion)[
+      Object.keys(thisQuestion).length - 1
+    ];
+    delete thisQuestion[lastData];
+    this.setState({
+      data: thisQuestion
+    });
+  }
+
+  handleCorrect(question_no, choice) {
+    let thisQuestion = Object.assign({}, this.state.data);
+    thisQuestion[question_no]["correct"] = choice;
+    this.setState({
+      data: thisQuestion
+    });
   }
 
   handleTab(question_no, choice, event) {
@@ -214,6 +263,7 @@ class QuestionEditPage extends React.Component {
         >
           ข้อสอบ {this.props.title} ทั้งหมด {examName.length} ข้อ
           <div
+            onClick={this.handleSubmit}
             style={{ marginTop: "-5px", borderRadius: 2 }}
             className="Button Primary"
           >
@@ -245,18 +295,32 @@ class QuestionEditPage extends React.Component {
                 <div style={{ width: 33, display: "inline-block" }}>
                   {question_no}.{" "}
                 </div>
-                <input
+                <textarea
                   className="questionTitleInput"
+                  onChange={() => {
+                    event.target.style.height = "";
+                    event.target.style.height =
+                      event.target.scrollHeight + "px";
+                    this.handleTitleChange(question_no, event);
+                  }}
+                  onFocus={() => {
+                    event.target.style.height = "";
+                    event.target.style.height =
+                      event.target.scrollHeight + "px";
+                  }}
                   value={question["title"]}
-                  onChange={() => this.handleTitleChange(question_no, event)}
                   autoFocus={true}
                   placeholder="คำถาม..."
                 />
-                <div className="Button Danger OperateButton">
+                <div
+                  onClick={() => this.handleDeleteQuestion(question_no)}
+                  className="Button Danger OperateButton"
+                >
                   <span></span>
                 </div>
               </div>
               <EditAnswer
+                handleCorrect={this.handleCorrect}
                 question={question}
                 question_no={question_no}
                 handleTab={this.handleTab}
@@ -274,16 +338,21 @@ class QuestionEditPage extends React.Component {
 }
 
 function EditAnswer(props) {
-  console.log(props.question);
   return (
     <ol className="questionAnswer">
       {Object.keys(props.question["answer"]).map(choice => (
         <li key={choice}>
-          <input
+          <textarea
             style={{ width: "calc(100% - 50px)" }}
-            onChange={() =>
-              props.handleChange(props.question_no, choice, event)
-            }
+            onChange={() => {
+              event.target.style.height = "";
+              event.target.style.height = event.target.scrollHeight + "px";
+              props.handleChange(props.question_no, choice, event);
+            }}
+            onFocus={() => {
+              event.target.style.height = "";
+              event.target.style.height = event.target.scrollHeight + "px";
+            }}
             className="questionInput"
             type="text"
             value={props.question["answer"][choice]}
@@ -295,7 +364,12 @@ function EditAnswer(props) {
               <span></span>
             </div>
           ) : (
-            <div className="Button OperateButton CorrectButton">
+            <div
+              onClick={() => {
+                props.handleCorrect(props.question_no, choice);
+              }}
+              className="Button OperateButton CorrectButton"
+            >
               <span></span>
             </div>
           )}
