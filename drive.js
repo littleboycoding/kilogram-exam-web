@@ -8,13 +8,13 @@ const fs = require("fs");
  */
 
 async function driveGet(name) {
-  fileName = new Promise((resolve, reject) => {
+  fileName = new Promise((resolve) => {
     fs.readFile("fileID.json", (err, data) => {
       if (err) console.log(err);
       resolve(JSON.parse(data)[name]);
     });
   });
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     ipcRenderer.send("driveGet", await fileName);
     ipcRenderer.on("driveGetRes", (event, res) => {
       resolve(res.data);
@@ -23,13 +23,13 @@ async function driveGet(name) {
 }
 
 async function driveUpdate(name, data) {
-  fileName = new Promise((resolve, reject) => {
+  fileName = new Promise((resolve) => {
     fs.readFile("fileID.json", (err, data) => {
       if (err) console.log(err);
       resolve(JSON.parse(data)[name]);
     });
   });
-  return new Promise(async (resolve, reject) => {
+  return new Promise(async (resolve) => {
     ipcRenderer.send("driveUpdate", await fileName, data);
     ipcRenderer.on("driveUpdateRes", (event, res) => {
       resolve(res.data);
