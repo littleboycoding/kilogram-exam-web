@@ -38,7 +38,6 @@ var CreateNewQuestion = function (_React$Component) {
     key: "handleSubmit",
     value: function handleSubmit(event) {
       this.setState({ loading: true });
-      //this.props.handleDialog.close(<QuestionEdit value={this.state.value} />);
       event.preventDefault();
     }
   }, {
@@ -412,13 +411,11 @@ var QuestionEditPage = function (_React$Component3) {
               React.createElement("textarea", {
                 className: "questionTitleInput",
                 onChange: function onChange() {
-                  event.target.style.height = "";
-                  event.target.style.height = event.target.scrollHeight + "px";
+                  QuestionEditPage.resizeTextarea(event);
                   _this8.handleTitleChange(question_no, event);
                 },
                 onFocus: function onFocus() {
-                  event.target.style.height = "";
-                  event.target.style.height = event.target.scrollHeight + "px";
+                  QuestionEditPage.resizeTextarea(event);
                 },
                 value: question["title"],
                 autoFocus: true,
@@ -455,6 +452,12 @@ var QuestionEditPage = function (_React$Component3) {
         )
       );
     }
+  }], [{
+    key: "resizeTextarea",
+    value: function resizeTextarea(event) {
+      event.target.style.height = "";
+      event.target.style.height = event.target.scrollHeight + "px";
+    }
   }]);
 
   return QuestionEditPage;
@@ -471,13 +474,11 @@ function EditAnswer(props) {
         React.createElement("textarea", {
           style: { width: "calc(100% - 50px)" },
           onChange: function onChange() {
-            event.target.style.height = "";
-            event.target.style.height = event.target.scrollHeight + "px";
+            QuestionEditPage.resizeTextarea(event);
             props.handleChange(props.question_no, choice, event);
           },
           onFocus: function onFocus() {
-            event.target.style.height = "";
-            event.target.style.height = event.target.scrollHeight + "px";
+            QuestionEditPage.resizeTextarea(event);
           },
           className: "questionInput",
           type: "text",

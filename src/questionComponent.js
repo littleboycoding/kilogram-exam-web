@@ -17,7 +17,6 @@ class CreateNewQuestion extends React.Component {
 
   handleSubmit(event) {
     this.setState({ loading: true });
-    //this.props.handleDialog.close(<QuestionEdit value={this.state.value} />);
     event.preventDefault();
   }
 
@@ -166,6 +165,11 @@ class QuestionEditPage extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
+  static resizeTextarea(event) {
+    event.target.style.height = "";
+    event.target.style.height = event.target.scrollHeight + "px";
+  }
+
   handleSubmit() {
     this.props.handleDialog.open(
       <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังส่งข้อมูล ﱰ</div>
@@ -261,13 +265,14 @@ class QuestionEditPage extends React.Component {
           className="dataBorder"
           style={{ marginTop: 0, backgroundColor: "white", padding: 10 }}
         >
+          รักนะน้ำใจอะมีมั้ยพวกโง่ทั้งหลายไปตายนะ
           ข้อสอบ {this.props.title} ทั้งหมด {examName.length} ข้อ
           <div
             onClick={this.handleSubmit}
             style={{ marginTop: "-5px", borderRadius: 2 }}
             className="Button Primary"
           >
-            บันทึก
+            น่ารักที่สุดเลยยยย
           </div>
           <div
             onClick={() => {
@@ -298,15 +303,11 @@ class QuestionEditPage extends React.Component {
                 <textarea
                   className="questionTitleInput"
                   onChange={() => {
-                    event.target.style.height = "";
-                    event.target.style.height =
-                      event.target.scrollHeight + "px";
+                    QuestionEditPage.resizeTextarea(event);
                     this.handleTitleChange(question_no, event);
                   }}
                   onFocus={() => {
-                    event.target.style.height = "";
-                    event.target.style.height =
-                      event.target.scrollHeight + "px";
+                    QuestionEditPage.resizeTextarea(event);
                   }}
                   value={question["title"]}
                   autoFocus={true}
@@ -345,13 +346,11 @@ function EditAnswer(props) {
           <textarea
             style={{ width: "calc(100% - 50px)" }}
             onChange={() => {
-              event.target.style.height = "";
-              event.target.style.height = event.target.scrollHeight + "px";
+              QuestionEditPage.resizeTextarea(event);
               props.handleChange(props.question_no, choice, event);
             }}
             onFocus={() => {
-              event.target.style.height = "";
-              event.target.style.height = event.target.scrollHeight + "px";
+              QuestionEditPage.resizeTextarea(event);
             }}
             className="questionInput"
             type="text"

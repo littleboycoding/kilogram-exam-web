@@ -50,7 +50,8 @@
 	font-weight: bold;
 	display: inline-block;
 	height: 41px;
-	width: calc(100% - 41px - 45px);
+	width: calc(100% - 41px - 41px);
+	min-height: 41px;
 	font-size: 15px;
 	border-bottom: 2px solid #EEE;
 	resize: none;
@@ -58,7 +59,7 @@
 	vertical-align: middle;
 }
 .OperateButton {
-	box-shadow: none;
+	box-shadow: 0px 2px 1px 0px #999;
 	min-height: 41px;
 	min-width: 41px;
 	position: relative;
