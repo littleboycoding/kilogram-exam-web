@@ -265,14 +265,13 @@ class QuestionEditPage extends React.Component {
           className="dataBorder"
           style={{ marginTop: 0, backgroundColor: "white", padding: 10 }}
         >
-          รักนะน้ำใจอะมีมั้ยพวกโง่ทั้งหลายไปตายนะ
           ข้อสอบ {this.props.title} ทั้งหมด {examName.length} ข้อ
           <div
             onClick={this.handleSubmit}
             style={{ marginTop: "-5px", borderRadius: 2 }}
             className="Button Primary"
           >
-            น่ารักที่สุดเลยยยย
+              บันทึก
           </div>
           <div
             onClick={() => {
