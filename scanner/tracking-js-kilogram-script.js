@@ -4,7 +4,7 @@ function tracking_start() {
   const answer = [null, "A", "B", "C", "D", "E"];
   const question_multipler = 5;
   const answer_available = 5;
-  const y_tostartfrom = 100;
+  const y_tostartfrom = 300;
 
   var summary = [];
   var total_mark = 0;
@@ -19,7 +19,7 @@ function tracking_start() {
   });
 
   const tracker = new tracking.ColorTracker(["black"]);
-  tracker.setMinDimension(5);
+  tracker.setMinDimension(20);
   tracker.on("track", function(event) {
     let head_start_pos = 0;
     let start = 0;
