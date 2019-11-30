@@ -9,6 +9,7 @@ class CreateNewQuestion extends React.Component {
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.data = Object.assign({}, this.props.body);
   }
 
   handleChange(event) {
@@ -17,6 +18,17 @@ class CreateNewQuestion extends React.Component {
 
   handleSubmit(event) {
     this.setState({ loading: true });
+
+    this.data[this.state.value] = {};
+
+    console.log(this.data);
+
+    driveUpdate("question.json", this.data).then(res => {
+      this.props.handleDialog.close(
+        <QuestionPage handleDialog={this.props.handleDialog} />
+      );
+    });
+
     event.preventDefault();
   }
 
@@ -61,18 +73,70 @@ class CreateNewQuestion extends React.Component {
   }
 }
 
+class QuestionDelete extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      loading: false
+    };
+
+    this.data = Object.assign({}, this.props.body);
+    this.deleteProc = this.deleteProc.bind(this);
+  }
+
+  deleteProc() {
+    delete this.data[this.props.title];
+
+    this.setState({ loading: true });
+
+    this.props.handleUpdate(this.data);
+
+    driveUpdate("question.json", this.data).then(res => {
+      this.props.handleDialog.close();
+    });
+  }
+
+  render() {
+    return !this.state.loading ? (
+      <div>
+        <span>ยืนยันการลบข้อสอบ</span>
+        <br />
+        <br />
+        <button
+          onClick={() => this.props.handleDialog.close()}
+          style={{ marginRight: "10px" }}
+          className="Button"
+        >
+          ยกเลิก
+        </button>
+        <button onClick={this.deleteProc} className="Button Danger">
+          ยืนยัน
+        </button>
+      </div>
+    ) : (
+      <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังส่งข้อมูล ﱰ</div>
+    );
+  }
+}
+
 class QuestionPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       data: ""
     };
+
+    this.handleUpdate = this.handleUpdate.bind(this);
   }
 
   fetchData() {
     driveGet("question.json").then(res => {
       this.setState({ data: res });
     });
+  }
+
+  handleUpdate(res) {
+    this.setState({ data: res });
   }
 
   componentDidMount() {
@@ -87,7 +151,10 @@ class QuestionPage extends React.Component {
           className="Button Primary"
           onClick={() =>
             this.props.handleDialog.open(
-              <CreateNewQuestion handleDialog={this.props.handleDialog} />
+              <CreateNewQuestion
+                handleDialog={this.props.handleDialog}
+                body={this.state.data}
+              />
             )
           }
         >
@@ -96,6 +163,7 @@ class QuestionPage extends React.Component {
         <QuestionListPage
           data={this.state.data}
           handleDialog={this.props.handleDialog}
+          handleUpdate={this.handleUpdate}
         />
       </div>
     );
@@ -112,7 +180,20 @@ function QuestionListPage(props) {
           ทั้งหมด {Object.keys(props.data[key]).length} ข้อ
         </div>
         <div className="questionTotal">สร้างเมื่อ 10 กรกฏาคม 2562</div>
-        <div className="Button Danger" style={{ width: "50px" }}>
+        <div
+          onClick={() =>
+            props.handleDialog.open(
+              <QuestionDelete
+                handleDialog={props.handleDialog}
+                body={props.data}
+                title={key}
+                handleUpdate={props.handleUpdate}
+              />
+            )
+          }
+          className="Button Danger"
+          style={{ width: "50px" }}
+        >
           ลบ
         </div>
         <div
@@ -271,7 +352,7 @@ class QuestionEditPage extends React.Component {
             style={{ marginTop: "-5px", borderRadius: 2 }}
             className="Button Primary"
           >
-              บันทึก
+            บันทึก
           </div>
           <div
             onClick={() => {

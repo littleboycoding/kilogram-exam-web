@@ -3,6 +3,7 @@ const { google } = require("googleapis");
 
 // Component for each section of Kilogram Exam desktop
 const { QuestionPage } = require("./component/questionComponent.js");
+const { StudentPage } = require("./component/studentComponent.js");
 
 class Account extends React.Component {
   constructor(props) {
@@ -124,6 +125,9 @@ class Container extends React.Component {
       close: res => {
         this.setState({
           dialogShown: false,
+          pageContent: res ? null : this.state.pageContent
+        });
+        this.setState({
           pageContent: res ? res : this.state.pageContent
         });
       }
@@ -134,7 +138,7 @@ class Container extends React.Component {
       ข้อสอบ: {
         page: <QuestionPage handleDialog={this.handleDialog} />
       },
-      นักเรียน: { page: null },
+      นักเรียน: { page: <StudentPage handleDialog={this.handleDialog} /> },
       สรุป: { page: null }
     };
 

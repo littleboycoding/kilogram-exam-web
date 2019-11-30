@@ -26,6 +26,7 @@ var CreateNewQuestion = function (_React$Component) {
     };
     _this.handleChange = _this.handleChange.bind(_this);
     _this.handleSubmit = _this.handleSubmit.bind(_this);
+    _this.data = Object.assign({}, _this.props.body);
     return _this;
   }
 
@@ -37,13 +38,24 @@ var CreateNewQuestion = function (_React$Component) {
   }, {
     key: "handleSubmit",
     value: function handleSubmit(event) {
+      var _this2 = this;
+
       this.setState({ loading: true });
+
+      this.data[this.state.value] = {};
+
+      console.log(this.data);
+
+      driveUpdate("question.json", this.data).then(function (res) {
+        _this2.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this2.props.handleDialog }));
+      });
+
       event.preventDefault();
     }
   }, {
     key: "render",
     value: function render() {
-      var _this2 = this;
+      var _this3 = this;
 
       if (!this.state.loading) {
         return React.createElement(
@@ -72,7 +84,7 @@ var CreateNewQuestion = function (_React$Component) {
               value: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01",
               style: { margin: 15, marginBottom: 0 },
               onClick: function onClick() {
-                return _this2.props.handleDialog.close();
+                return _this3.props.handleDialog.close();
               }
             }),
             React.createElement("input", {
@@ -96,28 +108,109 @@ var CreateNewQuestion = function (_React$Component) {
   return CreateNewQuestion;
 }(React.Component);
 
-var QuestionPage = function (_React$Component2) {
-  _inherits(QuestionPage, _React$Component2);
+var QuestionDelete = function (_React$Component2) {
+  _inherits(QuestionDelete, _React$Component2);
+
+  function QuestionDelete(props) {
+    _classCallCheck(this, QuestionDelete);
+
+    var _this4 = _possibleConstructorReturn(this, (QuestionDelete.__proto__ || Object.getPrototypeOf(QuestionDelete)).call(this, props));
+
+    _this4.state = {
+      loading: false
+    };
+
+    _this4.data = Object.assign({}, _this4.props.body);
+    _this4.deleteProc = _this4.deleteProc.bind(_this4);
+    return _this4;
+  }
+
+  _createClass(QuestionDelete, [{
+    key: "deleteProc",
+    value: function deleteProc() {
+      var _this5 = this;
+
+      delete this.data[this.props.title];
+
+      this.setState({ loading: true });
+
+      this.props.handleUpdate(this.data);
+
+      driveUpdate("question.json", this.data).then(function (res) {
+        _this5.props.handleDialog.close();
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this6 = this;
+
+      return !this.state.loading ? React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "span",
+          null,
+          "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19\u0E01\u0E32\u0E23\u0E25\u0E1A\u0E02\u0E49\u0E2D\u0E2A\u0E2D\u0E1A"
+        ),
+        React.createElement("br", null),
+        React.createElement("br", null),
+        React.createElement(
+          "button",
+          {
+            onClick: function onClick() {
+              return _this6.props.handleDialog.close();
+            },
+            style: { marginRight: "10px" },
+            className: "Button"
+          },
+          "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01"
+        ),
+        React.createElement(
+          "button",
+          { onClick: this.deleteProc, className: "Button Danger" },
+          "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19"
+        )
+      ) : React.createElement(
+        "div",
+        { style: { fontSize: 20, marginBottom: 15 } },
+        "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \uFC70"
+      );
+    }
+  }]);
+
+  return QuestionDelete;
+}(React.Component);
+
+var QuestionPage = function (_React$Component3) {
+  _inherits(QuestionPage, _React$Component3);
 
   function QuestionPage(props) {
     _classCallCheck(this, QuestionPage);
 
-    var _this3 = _possibleConstructorReturn(this, (QuestionPage.__proto__ || Object.getPrototypeOf(QuestionPage)).call(this, props));
+    var _this7 = _possibleConstructorReturn(this, (QuestionPage.__proto__ || Object.getPrototypeOf(QuestionPage)).call(this, props));
 
-    _this3.state = {
+    _this7.state = {
       data: ""
     };
-    return _this3;
+
+    _this7.handleUpdate = _this7.handleUpdate.bind(_this7);
+    return _this7;
   }
 
   _createClass(QuestionPage, [{
     key: "fetchData",
     value: function fetchData() {
-      var _this4 = this;
+      var _this8 = this;
 
       driveGet("question.json").then(function (res) {
-        _this4.setState({ data: res });
+        _this8.setState({ data: res });
       });
+    }
+  }, {
+    key: "handleUpdate",
+    value: function handleUpdate(res) {
+      this.setState({ data: res });
     }
   }, {
     key: "componentDidMount",
@@ -127,7 +220,7 @@ var QuestionPage = function (_React$Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this9 = this;
 
       return React.createElement(
         "div",
@@ -138,14 +231,18 @@ var QuestionPage = function (_React$Component2) {
             style: { display: "inline-block" },
             className: "Button Primary",
             onClick: function onClick() {
-              return _this5.props.handleDialog.open(React.createElement(CreateNewQuestion, { handleDialog: _this5.props.handleDialog }));
+              return _this9.props.handleDialog.open(React.createElement(CreateNewQuestion, {
+                handleDialog: _this9.props.handleDialog,
+                body: _this9.state.data
+              }));
             }
           },
           "\uF719 \u0E2A\u0E23\u0E49\u0E32\u0E07\u0E02\u0E49\u0E2D\u0E2A\u0E2D\u0E1A\u0E43\u0E2B\u0E21\u0E48"
         ),
         React.createElement(QuestionListPage, {
           data: this.state.data,
-          handleDialog: this.props.handleDialog
+          handleDialog: this.props.handleDialog,
+          handleUpdate: this.handleUpdate
         })
       );
     }
@@ -181,7 +278,18 @@ function QuestionListPage(props) {
       ),
       React.createElement(
         "div",
-        { className: "Button Danger", style: { width: "50px" } },
+        {
+          onClick: function onClick() {
+            return props.handleDialog.open(React.createElement(QuestionDelete, {
+              handleDialog: props.handleDialog,
+              body: props.data,
+              title: key,
+              handleUpdate: props.handleUpdate
+            }));
+          },
+          className: "Button Danger",
+          style: { width: "50px" }
+        },
         "\u0E25\u0E1A"
       ),
       React.createElement(
@@ -244,33 +352,33 @@ function QuestionListPage(props) {
   return result;
 }
 
-var QuestionEditPage = function (_React$Component3) {
-  _inherits(QuestionEditPage, _React$Component3);
+var QuestionEditPage = function (_React$Component4) {
+  _inherits(QuestionEditPage, _React$Component4);
 
   function QuestionEditPage(props) {
     _classCallCheck(this, QuestionEditPage);
 
-    var _this6 = _possibleConstructorReturn(this, (QuestionEditPage.__proto__ || Object.getPrototypeOf(QuestionEditPage)).call(this, props));
+    var _this10 = _possibleConstructorReturn(this, (QuestionEditPage.__proto__ || Object.getPrototypeOf(QuestionEditPage)).call(this, props));
 
-    _this6.state = {
-      data: _this6.props.data[_this6.props.title]
+    _this10.state = {
+      data: _this10.props.data[_this10.props.title]
     };
 
-    _this6.data = Object.assign({}, _this6.props.data);
-    _this6.handleAnswerChange = _this6.handleAnswerChange.bind(_this6);
-    _this6.handleTitleChange = _this6.handleTitleChange.bind(_this6);
-    _this6.handleTab = _this6.handleTab.bind(_this6);
-    _this6.addQuestion = _this6.addQuestion.bind(_this6);
-    _this6.handleCorrect = _this6.handleCorrect.bind(_this6);
-    _this6.handleDeleteQuestion = _this6.handleDeleteQuestion.bind(_this6);
-    _this6.handleSubmit = _this6.handleSubmit.bind(_this6);
-    return _this6;
+    _this10.data = Object.assign({}, _this10.props.data);
+    _this10.handleAnswerChange = _this10.handleAnswerChange.bind(_this10);
+    _this10.handleTitleChange = _this10.handleTitleChange.bind(_this10);
+    _this10.handleTab = _this10.handleTab.bind(_this10);
+    _this10.addQuestion = _this10.addQuestion.bind(_this10);
+    _this10.handleCorrect = _this10.handleCorrect.bind(_this10);
+    _this10.handleDeleteQuestion = _this10.handleDeleteQuestion.bind(_this10);
+    _this10.handleSubmit = _this10.handleSubmit.bind(_this10);
+    return _this10;
   }
 
   _createClass(QuestionEditPage, [{
     key: "handleSubmit",
     value: function handleSubmit() {
-      var _this7 = this;
+      var _this11 = this;
 
       this.props.handleDialog.open(React.createElement(
         "div",
@@ -282,7 +390,7 @@ var QuestionEditPage = function (_React$Component3) {
         writable: true
       });
       driveUpdate("question.json", this.data).then(function (res) {
-        _this7.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this7.props.handleDialog }));
+        _this11.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this11.props.handleDialog }));
       });
     }
   }, {
@@ -351,7 +459,7 @@ var QuestionEditPage = function (_React$Component3) {
   }, {
     key: "render",
     value: function render() {
-      var _this8 = this;
+      var _this12 = this;
 
       var examName = Object.keys(this.state.data);
       return React.createElement(
@@ -381,10 +489,10 @@ var QuestionEditPage = function (_React$Component3) {
             "div",
             {
               onClick: function onClick() {
-                if (_this8.props.data[_this8.props.title] != _this8.state.data) {
-                  _this8.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this8.props.handleDialog }));
+                if (_this12.props.data[_this12.props.title] != _this12.state.data) {
+                  _this12.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this12.props.handleDialog }));
                 } else {
-                  _this8.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this8.props.handleDialog }));
+                  _this12.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this12.props.handleDialog }));
                 }
               },
               style: { marginRight: 8, marginTop: "-5px", borderRadius: 2 },
@@ -394,7 +502,7 @@ var QuestionEditPage = function (_React$Component3) {
           )
         ),
         examName.map(function (question_no) {
-          var question = _this8.state.data[question_no];
+          var question = _this12.state.data[question_no];
           return React.createElement(
             "div",
             { className: "dataBorder", key: question_no },
@@ -412,7 +520,7 @@ var QuestionEditPage = function (_React$Component3) {
                 className: "questionTitleInput",
                 onChange: function onChange() {
                   QuestionEditPage.resizeTextarea(event);
-                  _this8.handleTitleChange(question_no, event);
+                  _this12.handleTitleChange(question_no, event);
                 },
                 onFocus: function onFocus() {
                   QuestionEditPage.resizeTextarea(event);
@@ -425,7 +533,7 @@ var QuestionEditPage = function (_React$Component3) {
                 "div",
                 {
                   onClick: function onClick() {
-                    return _this8.handleDeleteQuestion(question_no);
+                    return _this12.handleDeleteQuestion(question_no);
                   },
                   className: "Button Danger OperateButton"
                 },
@@ -437,11 +545,11 @@ var QuestionEditPage = function (_React$Component3) {
               )
             ),
             React.createElement(EditAnswer, {
-              handleCorrect: _this8.handleCorrect,
+              handleCorrect: _this12.handleCorrect,
               question: question,
               question_no: question_no,
-              handleTab: _this8.handleTab,
-              handleChange: _this8.handleAnswerChange
+              handleTab: _this12.handleTab,
+              handleChange: _this12.handleAnswerChange
             })
           );
         }),

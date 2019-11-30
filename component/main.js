@@ -18,6 +18,9 @@ var _require2 = require("googleapis"),
 var _require3 = require("./component/questionComponent.js"),
     QuestionPage = _require3.QuestionPage;
 
+var _require4 = require("./component/studentComponent.js"),
+    StudentPage = _require4.StudentPage;
+
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
 
@@ -217,6 +220,9 @@ var Container = function (_React$Component3) {
       close: function close(res) {
         _this4.setState({
           dialogShown: false,
+          pageContent: res ? null : _this4.state.pageContent
+        });
+        _this4.setState({
           pageContent: res ? res : _this4.state.pageContent
         });
       }
@@ -227,7 +233,7 @@ var Container = function (_React$Component3) {
       ข้อสอบ: {
         page: React.createElement(QuestionPage, { handleDialog: _this4.handleDialog })
       },
-      นักเรียน: { page: null },
+      นักเรียน: { page: React.createElement(StudentPage, { handleDialog: _this4.handleDialog }) },
       สรุป: { page: null }
     };
 

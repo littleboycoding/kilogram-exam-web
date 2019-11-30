@@ -1,41 +1,21 @@
 var fileUploaded = {};
 var fileList = {
+  "result.json": { body: {} },
+  "student.json": { body: {} },
   "question.json": {
     body: {
-      "Fruit Bucket": {
+      ตัวอย่างข้อสอบ: {
         1: {
-          title: "What's color of apple",
-          answer: { 1: "Red", 2: "Pink", 3: "Purple", 4: "Black" },
-          correct: 1
-        },
-        2: {
-          title: "Which one is smallest",
+          title: "คำถามข้อแรก",
           answer: {
-            1: "Watermelon",
-            2: "Durian",
-            3: "Mango",
-            4: "Orange"
+            1: "ใช่",
+            2: "ไม่ใช่",
+            3: "ใช่ทั้งหมด",
+            4: "ไม่มีข้อที่ถูก"
           },
-          correct: 4
+          correct: 1
         }
       },
-      Animal: {
-        1: {
-          title: "How many leg does dog have ?",
-          answer: { 1: "Four", 2: "Three", 3: "One", 4: "Two" },
-          correct: 1
-        },
-        2: {
-          title: "Can duck fly ?",
-          answer: {
-            1: "Yes",
-            2: "No",
-            3: "Some species can and some aren't",
-            4: "Yes, but not so good"
-          },
-          correct: 4
-        }
-      }
     }
   }
 };
