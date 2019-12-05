@@ -1,10 +1,11 @@
+const { ipcRenderer } = require("electron");
 const { driveGet, driveUpdate } = require("../drive");
 
 class CreateNewQuestion extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      value: "ข้อสอบใหม่",
+      value: "",
       loading: false
     };
     this.handleChange = this.handleChange.bind(this);
@@ -45,7 +46,7 @@ class CreateNewQuestion extends React.Component {
               type="text"
               placeholder="ชื่อข้อสอบ"
               value={this.state.value}
-              required={true}
+              required="true"
               onChange={this.handleChange}
             />
             <br />
@@ -130,8 +131,12 @@ class QuestionPage extends React.Component {
   }
 
   fetchData() {
+    this.props.handleDialog.open(
+      <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังโหลด ﱰ</div>
+    );
     driveGet("question.json").then(res => {
       this.setState({ data: res });
+      this.props.handleDialog.close();
     });
   }
 
@@ -173,13 +178,13 @@ class QuestionPage extends React.Component {
 function QuestionListPage(props) {
   let result = [];
   for (const key of Object.keys(props.data)) {
+    console.log(props.data[key]);
     result.push(
       <div key={key} className="dataBorder">
         <div className="questionTitle">﫳 {key}</div>
         <div className="questionTotal">
           ทั้งหมด {Object.keys(props.data[key]).length} ข้อ
         </div>
-        <div className="questionTotal">สร้างเมื่อ 10 กรกฏาคม 2562</div>
         <div
           onClick={() =>
             props.handleDialog.open(
@@ -197,6 +202,7 @@ function QuestionListPage(props) {
           ลบ
         </div>
         <div
+          onClick={() => ipcRenderer.send("print", props.data[key])}
           style={{
             width: "calc(100% / 2 - 25px)",
             borderLeft: "1px solid #CCC"
@@ -300,7 +306,7 @@ class QuestionEditPage extends React.Component {
     if (
       event.key === "Tab" &&
       Object.keys(this.state.data).length == question_no &&
-      choice == 4
+      choice == 5
     ) {
       event.preventDefault();
       this.addQuestion();
@@ -311,7 +317,7 @@ class QuestionEditPage extends React.Component {
     this.setState((state, props) => {
       const data = Object.assign(state.data, {
         [Object.keys(state.data).length + 1]: {
-          answer: { 1: "", 2: "", 3: "", 4: "" },
+          answer: { 1: "", 2: "", 3: "", 4: "", 5: "" },
           correct: null,
           title: "New Question"
         }

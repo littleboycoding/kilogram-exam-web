@@ -23,10 +23,12 @@ const SCOPE = [
 ];
 
 var mainWindow;
+var printWindow;
 var dialogSigninWindow;
 var oauth2;
 var server;
 var drive;
+var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
 
 /*
  * createWindow()
@@ -46,6 +48,7 @@ function createWindow() {
   });
 
   mainWindow.loadFile("index.html");
+  mainWindow.on("closed", () => app.quit());
 
   //Once mainWindow ready to be shown, show it and check if there are already token.json has been saved in root directory
   mainWindow.once("ready-to-show", () => {
@@ -67,38 +70,49 @@ function createWindow() {
  */
 
 function initializeData() {
-  fs.readFile("fileID.json", async (err, data) => {
-    if (err) {
-      drive.files.list(
-        {
-          spaces: "appDataFolder",
-          fields: "nextPageToken, files(id, name)",
-          pageSize: 100
-        },
-        (err, res) => {
-          if (err) {
-            console.log(err);
-          } else {
-            if (res.data.files.length > 0) {
-              console.log(
-                "Found a file on Google drive fetching it into fileID.json ",
-                res.data.files
-              );
-              let fileUploaded = {};
-              res.data.files.forEach(x => {
-                fileUploaded[x.name] = x.id;
-              });
-              fs.writeFile("fileID.json", JSON.stringify(fileUploaded), err =>
-                console.log(err)
-              );
+  return new Promise((resolve, eject) => {
+    fs.readFile("fileID.json", async (err, data) => {
+      if (err) {
+        drive.files.list(
+          {
+            spaces: "appDataFolder",
+            fields: "nextPageToken, files(id, name)",
+            pageSize: 100
+          },
+          (err, res) => {
+            if (err) {
+              console.log(err);
             } else {
-              console.log("File not found on Google drive, creating new one");
-              require("./createFile").createInitialFile(drive);
+              if (res.data.files.length > 0) {
+                console.log(
+                  "Found a file on Google drive fetching it into fileID.json ",
+                  res.data.files
+                );
+                let fileUploaded = {};
+                res.data.files.forEach(x => {
+                  fileUploaded[x.name] = x.id;
+                });
+                fs.writeFile(
+                  "fileID.json",
+                  JSON.stringify(fileUploaded),
+                  err => {
+                    if (err) console.log(err);
+                    resolve();
+                  }
+                );
+              } else {
+                console.log("File not found on Google drive, creating new one");
+                require("./createFile")
+                  .createInitialFile(drive)
+                  .then(() => resolve());
+              }
             }
           }
-        }
-      );
-    }
+        );
+      } else {
+        resolve();
+      }
+    });
   });
 }
 
@@ -131,11 +145,11 @@ function createHTTPServer() {
         if (err) console.log("Error in saving token.json");
       });
       dialogSigninWindow.close();
-      server.close(
-        await initializeData(),
-        mainWindow.webContents.send("signInSuccess"),
-        mainWindow.webContents.send("userInfo", await getProfile())
-      );
+      server.close(async () => {
+        await initializeData();
+        mainWindow.webContents.send("signInSuccess");
+        mainWindow.webContents.send("userInfo", await getProfile());
+      });
     });
   });
 }
@@ -164,17 +178,20 @@ function getProfile() {
  */
 
 function dialogSignin(url) {
-  if (!dialogSigninWindow) {
-    dialogSigninWindow = new BrowserWindow({
-      width: 600,
-      height: 800,
-      autoHideMenuBar: true,
-      backgroundColor: "#fff",
-      webPreferences: {
-        nodeIntegration: false
-      }
-    });
-  }
+  dialogSigninWindow = new BrowserWindow({
+    width: 600,
+    height: 800,
+    autoHideMenuBar: true,
+    backgroundColor: "#fff",
+    webPreferences: {
+      nodeIntegration: false
+    }
+  });
+
+  dialogSigninWindow.on("closed", () => {
+    server.close();
+  });
+
   if (!server.listening) {
     server.listen(8080);
   }
@@ -233,4 +250,69 @@ ipcMain.on("driveGet", (event, data) => {
   getData(data).then(res => {
     event.reply("driveGetRes", res);
   });
+});
+
+ipcMain.on("logout", () => {
+  console.log("Logout !");
+  fs.unlinkSync("./token.json");
+  fs.unlinkSync("./fileID.json");
+  app.relaunch();
+  app.exit(0);
+});
+
+ipcMain.on("print", (window, data) => {
+  //mainWindow.webContents.printToPDF({}).then(pdf => {
+  //fs.writeFile("./pdf.pdf", pdf, err => {
+  //null;
+  //});
+  //});
+
+  //mainWindow.webContents.print({}, (success, failed) => {
+  //if (failed) console.log(failed);
+  //console.log(success);
+  //});
+
+  const dataListed = Object.keys(data);
+  let htmlResult = dataListed.map(map => {
+    //return data[map]["title"] + data[map]["answer"];
+    return (
+      "<p>" +
+      map +
+      ". " +
+      data[map]["title"] +
+      "</p>" +
+      Object.keys(data[map]["answer"])
+        .map(maps =>
+          data[map]["answer"][maps]
+            ? markName[maps] + ". " + data[map]["answer"][maps]
+            : null
+        )
+        .join("</br>")
+    );
+  });
+
+  printWindow = new BrowserWindow({
+    width: 600,
+    height: 800,
+    backgroundColor: "#fff",
+    autoHideMenuBar: true,
+    show: true,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
+  fs.writeFile(
+    "question.html",
+    "<title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
+      htmlResult.join("<hr>") +
+      "<script>print()</script>",
+    err => {
+      if (err) {
+        console.log(err);
+      }
+      printWindow.loadFile("question.html");
+      printWindow.on("close", () => fs.unlinkSync("question.html"));
+    }
+  );
 });

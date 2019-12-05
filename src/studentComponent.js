@@ -12,9 +12,12 @@ class StudentPage extends React.Component {
   }
 
   fetchData() {
+    this.props.handleDialog.open(
+      <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังโหลด ﱰ</div>
+    );
     driveGet("student.json").then(res => {
       this.setState({ body: res });
-      console.log(res);
+      this.props.handleDialog.close();
     });
   }
 
@@ -185,6 +188,8 @@ class CreateStudent extends React.Component {
           <form onSubmit={this.handleSubmit}>
             <input
               type="text"
+              maxlength="10"
+              required="true"
               placeholder="รหัสประจำตัว"
               style={{
                 padding: "5px",
@@ -196,6 +201,7 @@ class CreateStudent extends React.Component {
             />
             <br />
             <input
+              required="true"
               type="text"
               placeholder="ชื่อ-นามสกุล"
               style={{

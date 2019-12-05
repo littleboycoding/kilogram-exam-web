@@ -1,3 +1,7 @@
+@font-face {
+  font-family: "Hack Nerd Font";
+  src: url("/font/Hack Nerd Font.ttf") format("ttf");
+}
 * {
   box-sizing: border-box;
   font-family: Hack Nerd Font;
@@ -143,4 +147,20 @@ body {
 .studentList tr td {
   background-color: white;
   padding: 3px;
+}
+.profileArea:hover {
+  cursor: pointer;
+  background-color: #ccc;
+}
+.profileArea {
+  padding: 3px;
+  border-radius: 5px;
+}
+.answerTable td {
+  border: 1px solid #ccc;
+}
+.resultBorder {
+  border-radius: 5px;
+  background-color: #efefef;
+  padding: 7px;
 }

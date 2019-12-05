@@ -4,6 +4,7 @@ const { google } = require("googleapis");
 // Component for each section of Kilogram Exam desktop
 const { QuestionPage } = require("./component/questionComponent.js");
 const { StudentPage } = require("./component/studentComponent.js");
+const { ResultPage } = require("./component/resultComponent.js");
 
 class Account extends React.Component {
   constructor(props) {
@@ -24,7 +25,15 @@ class Account extends React.Component {
 
   render() {
     return (
-      <span id="account">
+      <span
+        onClick={() =>
+          this.props.handleDialog.open(
+            <LogoutDialog handleDialog={this.props.handleDialog} />
+          )
+        }
+        className="profileArea"
+        id="account"
+      >
         <img
           style={{ height: "20px", borderRadius: "50%" }}
           align="center"
@@ -36,10 +45,35 @@ class Account extends React.Component {
   }
 }
 
+function Logout() {
+  ipcRenderer.send("logout");
+}
+
+function LogoutDialog(props) {
+  return (
+    <div>
+      <div style={{ fontSize: 20, marginBottom: 15 }}>ต้องการออกจากระบบ ?</div>
+      <input
+        onClick={() => props.handleDialog.close()}
+        type="button"
+        style={{ marginRight: "10px" }}
+        className="Button"
+        value="ยกเลิก"
+      />
+      <input
+        onClick={Logout}
+        type="button"
+        className="Button Danger"
+        value="ยืนยัน"
+      />
+    </div>
+  );
+}
+
 function Header(props) {
   return (
     <div id="header">
-      {props.value} <Account />
+      {props.value} <Account handleDialog={props.handleDialog} />
     </div>
   );
 }
@@ -50,7 +84,7 @@ function Sidebar_Button(props) {
       className={"sidebar_bt " + props.className}
       onClick={() => props.onClick(props.name)}
     >
-       {props.name}
+      {props.name}
     </div>
   );
 }
@@ -77,7 +111,7 @@ function Sidebar(props) {
 function ContentContainer(props) {
   return (
     <div id="content_container">
-      <Header value={props.activePage} />
+      <Header handleDialog={props.handleDialog} value={props.activePage} />
       <div className="content">{props.pageContent}</div>
     </div>
   );
@@ -134,18 +168,17 @@ class Container extends React.Component {
     };
 
     this.menu = {
-      หน้าแรก: { page: null },
-      ข้อสอบ: {
+      "ﴕ ข้อสอบ": {
         page: <QuestionPage handleDialog={this.handleDialog} />
       },
-      นักเรียน: { page: <StudentPage handleDialog={this.handleDialog} /> },
-      สรุป: { page: null }
+      " นักเรียน": { page: <StudentPage handleDialog={this.handleDialog} /> },
+      " สรุป": { page: <ResultPage handleDialog={this.handleDialog} /> }
     };
 
     this.state = {
       menuList: this.menu,
-      activePage: Object.keys(this.menu)[0],
-      pageContent: this.menu[Object.keys(this.menu)[0]]["page"],
+      activePage: null,
+      pageContent: null,
       dialogShown: true,
       dialogContent: (
         <SignIn_Button
@@ -155,15 +188,19 @@ class Container extends React.Component {
         />
       )
     };
+    this.handleClick = this.handleClick.bind(this);
+    this.handleDialog.open = this.handleDialog.open.bind(this);
+    this.handleDialog.close = this.handleDialog.close.bind(this);
+
     ipcRenderer.on("signInSuccess", event => {
       this.setState({
         dialogShown: false
       });
+      this.handleClick(
+        Object.keys(this.menu)[0],
+        this.menu[Object.keys(this.menu)[0]]["page"]
+      );
     });
-
-    this.handleClick = this.handleClick.bind(this);
-    this.handleDialog.open = this.handleDialog.open.bind(this);
-    this.handleDialog.close = this.handleDialog.close.bind(this);
   }
 
   handleClick(activeNum, page) {
@@ -185,6 +222,7 @@ class Container extends React.Component {
           onClick={this.handleClick}
         />
         <ContentContainer
+          handleDialog={this.handleDialog}
           activePage={this.state.activePage}
           pageContent={this.state.pageContent}
           menuList={this.state.menuList}

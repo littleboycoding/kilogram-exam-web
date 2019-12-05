@@ -8,9 +8,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var _require = require("../drive"),
-    driveGet = _require.driveGet,
-    driveUpdate = _require.driveUpdate;
+var _require = require("electron"),
+    ipcRenderer = _require.ipcRenderer;
+
+var _require2 = require("../drive"),
+    driveGet = _require2.driveGet,
+    driveUpdate = _require2.driveUpdate;
 
 var CreateNewQuestion = function (_React$Component) {
   _inherits(CreateNewQuestion, _React$Component);
@@ -21,7 +24,7 @@ var CreateNewQuestion = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (CreateNewQuestion.__proto__ || Object.getPrototypeOf(CreateNewQuestion)).call(this, props));
 
     _this.state = {
-      value: "ข้อสอบใหม่",
+      value: "",
       loading: false
     };
     _this.handleChange = _this.handleChange.bind(_this);
@@ -74,7 +77,7 @@ var CreateNewQuestion = function (_React$Component) {
               type: "text",
               placeholder: "\u0E0A\u0E37\u0E48\u0E2D\u0E02\u0E49\u0E2D\u0E2A\u0E2D\u0E1A",
               value: this.state.value,
-              required: true,
+              required: "true",
               onChange: this.handleChange
             }),
             React.createElement("br", null),
@@ -203,8 +206,14 @@ var QuestionPage = function (_React$Component3) {
     value: function fetchData() {
       var _this8 = this;
 
+      this.props.handleDialog.open(React.createElement(
+        "div",
+        { style: { fontSize: 20, marginBottom: 15 } },
+        "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14 \uFC70"
+      ));
       driveGet("question.json").then(function (res) {
         _this8.setState({ data: res });
+        _this8.props.handleDialog.close();
       });
     }
   }, {
@@ -255,6 +264,7 @@ function QuestionListPage(props) {
   var result = [];
 
   var _loop = function _loop(key) {
+    console.log(props.data[key]);
     result.push(React.createElement(
       "div",
       { key: key, className: "dataBorder" },
@@ -270,11 +280,6 @@ function QuestionListPage(props) {
         "\u0E17\u0E31\u0E49\u0E07\u0E2B\u0E21\u0E14 ",
         Object.keys(props.data[key]).length,
         " \u0E02\u0E49\u0E2D"
-      ),
-      React.createElement(
-        "div",
-        { className: "questionTotal" },
-        "\u0E2A\u0E23\u0E49\u0E32\u0E07\u0E40\u0E21\u0E37\u0E48\u0E2D 10 \u0E01\u0E23\u0E01\u0E0F\u0E32\u0E04\u0E21 2562"
       ),
       React.createElement(
         "div",
@@ -295,6 +300,9 @@ function QuestionListPage(props) {
       React.createElement(
         "div",
         {
+          onClick: function onClick() {
+            return ipcRenderer.send("print", props.data[key]);
+          },
           style: {
             width: "calc(100% / 2 - 25px)",
             borderLeft: "1px solid #CCC"
@@ -419,7 +427,7 @@ var QuestionEditPage = function (_React$Component4) {
   }, {
     key: "handleTab",
     value: function handleTab(question_no, choice, event) {
-      if (event.key === "Tab" && Object.keys(this.state.data).length == question_no && choice == 4) {
+      if (event.key === "Tab" && Object.keys(this.state.data).length == question_no && choice == 5) {
         event.preventDefault();
         this.addQuestion();
       }
@@ -429,7 +437,7 @@ var QuestionEditPage = function (_React$Component4) {
     value: function addQuestion() {
       this.setState(function (state, props) {
         var data = Object.assign(state.data, _defineProperty({}, Object.keys(state.data).length + 1, {
-          answer: { 1: "", 2: "", 3: "", 4: "" },
+          answer: { 1: "", 2: "", 3: "", 4: "", 5: "" },
           correct: null,
           title: "New Question"
         }));

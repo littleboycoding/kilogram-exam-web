@@ -15,20 +15,27 @@ var fileList = {
           },
           correct: 1
         }
-      },
+      }
     }
   }
 };
 
-async function createInitialFile(drive) {
-  for (const key of Object.keys(fileList)) {
-    await creatingProcess(key, fileList[key]["body"], drive).then(
-      res => (fileUploaded[key] = res.data.id)
+function createInitialFile(drive) {
+  return new Promise(async (resolve, eject) => {
+    for (const key of Object.keys(fileList)) {
+      await creatingProcess(key, fileList[key]["body"], drive).then(
+        res => (fileUploaded[key] = res.data.id)
+      );
+    }
+    require("fs").writeFile(
+      "fileID.json",
+      JSON.stringify(fileUploaded),
+      err => {
+        if (err) console.log(err);
+        resolve();
+      }
     );
-  }
-  require("fs").writeFile("fileID.json", JSON.stringify(fileUploaded), err =>
-    console.log(err)
-  );
+  });
 }
 
 function creatingProcess(fileName, body, drive) {

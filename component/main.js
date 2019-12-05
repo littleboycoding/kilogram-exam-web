@@ -21,6 +21,9 @@ var _require3 = require("./component/questionComponent.js"),
 var _require4 = require("./component/studentComponent.js"),
     StudentPage = _require4.StudentPage;
 
+var _require5 = require("./component/resultComponent.js"),
+    ResultPage = _require5.ResultPage;
+
 var Account = function (_React$Component) {
   _inherits(Account, _React$Component);
 
@@ -47,9 +50,17 @@ var Account = function (_React$Component) {
   _createClass(Account, [{
     key: "render",
     value: function render() {
+      var _this2 = this;
+
       return React.createElement(
         "span",
-        { id: "account" },
+        {
+          onClick: function onClick() {
+            return _this2.props.handleDialog.open(React.createElement(LogoutDialog, { handleDialog: _this2.props.handleDialog }));
+          },
+          className: "profileArea",
+          id: "account"
+        },
         React.createElement("img", {
           style: { height: "20px", borderRadius: "50%" },
           align: "center",
@@ -68,13 +79,44 @@ var Account = function (_React$Component) {
   return Account;
 }(React.Component);
 
+function Logout() {
+  ipcRenderer.send("logout");
+}
+
+function LogoutDialog(props) {
+  return React.createElement(
+    "div",
+    null,
+    React.createElement(
+      "div",
+      { style: { fontSize: 20, marginBottom: 15 } },
+      "\u0E15\u0E49\u0E2D\u0E07\u0E01\u0E32\u0E23\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E23\u0E30\u0E1A\u0E1A ?"
+    ),
+    React.createElement("input", {
+      onClick: function onClick() {
+        return props.handleDialog.close();
+      },
+      type: "button",
+      style: { marginRight: "10px" },
+      className: "Button",
+      value: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01"
+    }),
+    React.createElement("input", {
+      onClick: Logout,
+      type: "button",
+      className: "Button Danger",
+      value: "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19"
+    })
+  );
+}
+
 function Header(props) {
   return React.createElement(
     "div",
     { id: "header" },
     props.value,
     " ",
-    React.createElement(Account, null)
+    React.createElement(Account, { handleDialog: props.handleDialog })
   );
 }
 
@@ -87,7 +129,6 @@ function Sidebar_Button(props) {
         return props.onClick(props.name);
       }
     },
-    "\uF015 ",
     props.name
   );
 }
@@ -146,7 +187,7 @@ function ContentContainer(props) {
   return React.createElement(
     "div",
     { id: "content_container" },
-    React.createElement(Header, { value: props.activePage }),
+    React.createElement(Header, { handleDialog: props.handleDialog, value: props.activePage }),
     React.createElement(
       "div",
       { className: "content" },
@@ -173,29 +214,29 @@ var SignIn_Button = function (_React$Component2) {
   function SignIn_Button(props) {
     _classCallCheck(this, SignIn_Button);
 
-    var _this2 = _possibleConstructorReturn(this, (SignIn_Button.__proto__ || Object.getPrototypeOf(SignIn_Button)).call(this, props));
+    var _this3 = _possibleConstructorReturn(this, (SignIn_Button.__proto__ || Object.getPrototypeOf(SignIn_Button)).call(this, props));
 
-    _this2.state = {
+    _this3.state = {
       hovering: false
     };
-    return _this2;
+    return _this3;
   }
 
   _createClass(SignIn_Button, [{
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       return React.createElement("img", {
         className: "hover_pointer",
         onMouseOver: function onMouseOver() {
-          return _this3.setState({ hovering: true });
+          return _this4.setState({ hovering: true });
         },
         onMouseOut: function onMouseOut() {
-          return _this3.setState({ hovering: false });
+          return _this4.setState({ hovering: false });
         },
         onClick: function onClick() {
-          ipcRenderer.send(_this3.props.signinMethod);
+          ipcRenderer.send(_this4.props.signinMethod);
         },
         src: !this.state.hovering ? this.props.src : this.props.srcHover
       });
@@ -211,36 +252,35 @@ var Container = function (_React$Component3) {
   function Container(props) {
     _classCallCheck(this, Container);
 
-    var _this4 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
+    var _this5 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
 
-    _this4.handleDialog = {
+    _this5.handleDialog = {
       open: function open(msg) {
-        _this4.setState({ dialogShown: true, dialogContent: msg });
+        _this5.setState({ dialogShown: true, dialogContent: msg });
       },
       close: function close(res) {
-        _this4.setState({
+        _this5.setState({
           dialogShown: false,
-          pageContent: res ? null : _this4.state.pageContent
+          pageContent: res ? null : _this5.state.pageContent
         });
-        _this4.setState({
-          pageContent: res ? res : _this4.state.pageContent
+        _this5.setState({
+          pageContent: res ? res : _this5.state.pageContent
         });
       }
     };
 
-    _this4.menu = {
-      หน้าแรก: { page: null },
-      ข้อสอบ: {
-        page: React.createElement(QuestionPage, { handleDialog: _this4.handleDialog })
+    _this5.menu = {
+      "ﴕ ข้อสอบ": {
+        page: React.createElement(QuestionPage, { handleDialog: _this5.handleDialog })
       },
-      นักเรียน: { page: React.createElement(StudentPage, { handleDialog: _this4.handleDialog }) },
-      สรุป: { page: null }
+      " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this5.handleDialog }) },
+      " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this5.handleDialog }) }
     };
 
-    _this4.state = {
-      menuList: _this4.menu,
-      activePage: Object.keys(_this4.menu)[0],
-      pageContent: _this4.menu[Object.keys(_this4.menu)[0]]["page"],
+    _this5.state = {
+      menuList: _this5.menu,
+      activePage: null,
+      pageContent: null,
       dialogShown: true,
       dialogContent: React.createElement(SignIn_Button, {
         src: "google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png",
@@ -248,16 +288,17 @@ var Container = function (_React$Component3) {
         signinMethod: "googleSignin"
       })
     };
+    _this5.handleClick = _this5.handleClick.bind(_this5);
+    _this5.handleDialog.open = _this5.handleDialog.open.bind(_this5);
+    _this5.handleDialog.close = _this5.handleDialog.close.bind(_this5);
+
     ipcRenderer.on("signInSuccess", function (event) {
-      _this4.setState({
+      _this5.setState({
         dialogShown: false
       });
+      _this5.handleClick(Object.keys(_this5.menu)[0], _this5.menu[Object.keys(_this5.menu)[0]]["page"]);
     });
-
-    _this4.handleClick = _this4.handleClick.bind(_this4);
-    _this4.handleDialog.open = _this4.handleDialog.open.bind(_this4);
-    _this4.handleDialog.close = _this4.handleDialog.close.bind(_this4);
-    return _this4;
+    return _this5;
   }
 
   _createClass(Container, [{
@@ -285,6 +326,7 @@ var Container = function (_React$Component3) {
           onClick: this.handleClick
         }),
         React.createElement(ContentContainer, {
+          handleDialog: this.handleDialog,
           activePage: this.state.activePage,
           pageContent: this.state.pageContent,
           menuList: this.state.menuList

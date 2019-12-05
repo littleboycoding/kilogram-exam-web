@@ -34,9 +34,14 @@ var StudentPage = function (_React$Component) {
     value: function fetchData() {
       var _this2 = this;
 
+      this.props.handleDialog.open(React.createElement(
+        "div",
+        { style: { fontSize: 20, marginBottom: 15 } },
+        "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14 \uFC70"
+      ));
       driveGet("student.json").then(function (res) {
         _this2.setState({ body: res });
-        console.log(res);
+        _this2.props.handleDialog.close();
       });
     }
   }, {
@@ -285,6 +290,8 @@ var CreateStudent = function (_React$Component3) {
             { onSubmit: this.handleSubmit },
             React.createElement("input", {
               type: "text",
+              maxlength: "10",
+              required: "true",
               placeholder: "\u0E23\u0E2B\u0E31\u0E2A\u0E1B\u0E23\u0E30\u0E08\u0E33\u0E15\u0E31\u0E27",
               style: {
                 padding: "5px",
@@ -298,6 +305,7 @@ var CreateStudent = function (_React$Component3) {
             }),
             React.createElement("br", null),
             React.createElement("input", {
+              required: "true",
               type: "text",
               placeholder: "\u0E0A\u0E37\u0E48\u0E2D-\u0E19\u0E32\u0E21\u0E2A\u0E01\u0E38\u0E25",
               style: {
