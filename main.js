@@ -11,6 +11,7 @@
 
 const { app, ipcMain, BrowserWindow } = require("electron");
 const { google } = require("googleapis");
+const credentialsJSON = require("./credentials.json");
 const fs = require("fs");
 const http = require("http");
 //token.json used to store credentials, included refresh token, access token, scope and token type
@@ -224,14 +225,12 @@ function updateData(fileName, data) {
 
 //On app ready, read credentials.json file and create google.auth.OAuth2 with given data into oauth2. Then call createWindow() to create main window
 app.on("ready", () => {
-  fs.readFile("credentials.json", (err, data) => {
-    const credentials = JSON.parse(data);
-    const { client_secret, client_id, redirect_uris } = credentials.installed;
-    oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
-    drive = google.drive({
-      version: "v3",
-      auth: oauth2
-    });
+  const credentials = credentialsJSON;
+  const { client_secret, client_id, redirect_uris } = credentials.installed;
+  oauth2 = new google.auth.OAuth2(client_id, client_secret, redirect_uris[1]);
+  drive = google.drive({
+    version: "v3",
+    auth: oauth2
   });
   createWindow();
 });
