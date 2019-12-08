@@ -301,17 +301,11 @@ ipcMain.on("print", (window, data) => {
     }
   });
 
-  fs.writeFile(
-    "question.html",
-    "<title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
+  console.log(__dirname);
+
+  printWindow.loadURL(
+    "data:text/html;charset=UTF-8,<title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
       htmlResult.join("<hr>") +
-      "<script>print()</script>",
-    err => {
-      if (err) {
-        console.log(err);
-      }
-      printWindow.loadFile("question.html");
-      printWindow.on("close", () => fs.unlinkSync("question.html"));
-    }
+      "<script>print()</script>"
   );
 });
