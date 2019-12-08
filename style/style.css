@@ -1,10 +1,10 @@
 @font-face {
   font-family: "Hack Nerd Font";
-  src: url("/font/Hack Nerd Font.ttf") format("ttf");
+  src: url("../font/Hack Nerd Font.ttf") format("truetype");
 }
 * {
   box-sizing: border-box;
-  font-family: Hack Nerd Font;
+  font-family: "Hack Nerd Font";
 }
 body,
 html,
