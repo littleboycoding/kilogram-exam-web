@@ -35,6 +35,7 @@ var ResultPage = function (_React$Component) {
         "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14 \uFC70"
       ));
       driveGet("result.json").then(function (res) {
+        console.log(res);
         _this2.setState({ body: res });
         _this2.props.handleDialog.close();
       });
@@ -111,14 +112,14 @@ var ResultPage = function (_React$Component) {
               "span",
               { className: "resultBorder" },
               "\u0E04\u0E30\u0E41\u0E19\u0E19\u0E2A\u0E39\u0E07\u0E2A\u0E38\u0E14 ",
-              sortedScore[0]
+              sortedScore[sortedScore.length - 1]
             ),
             " ",
             React.createElement(
               "span",
               { className: "resultBorder" },
               "\u0E04\u0E30\u0E41\u0E19\u0E19\u0E15\u0E48\u0E33\u0E2A\u0E38\u0E14 ",
-              sortedScore[sortedScore.length - 1]
+              sortedScore[0]
             ),
             " ",
             React.createElement(

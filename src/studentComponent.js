@@ -159,18 +159,33 @@ class CreateStudent extends React.Component {
   }
 
   handleSubmit(event) {
-    this.setState({ loading: true });
+    if (this.data[this.state.id] == undefined) {
+      this.setState({ loading: true });
 
-    this.data[this.state.id] = this.state.name;
+      this.data[this.state.id] = this.state.name;
 
-    console.log(this.data);
+      console.log(this.data);
 
-    driveUpdate("student.json", this.data).then(res =>
-      this.props.handleDialog.close(
-        <StudentPage handleDialog={this.props.handleDialog} />
-      )
-    );
-
+      driveUpdate("student.json", this.data).then(res =>
+        this.props.handleDialog.close(
+          <StudentPage handleDialog={this.props.handleDialog} />
+        )
+      );
+    } else {
+      this.props.handleDialog.open(
+        <div style={{ fontSize: 18, marginBottom: 15 }}>
+          มีรหัสนักเรียนนี้อยู่แล้ว กรุณาใช้หมายเลขอื่น
+          <br />
+          <br />
+          <button
+            className="Button"
+            onClick={() => this.props.handleDialog.close()}
+          >
+            ตกลง
+          </button>
+        </div>
+      );
+    }
     event.preventDefault();
   }
 

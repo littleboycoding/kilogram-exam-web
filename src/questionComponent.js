@@ -18,17 +18,33 @@ class CreateNewQuestion extends React.Component {
   }
 
   handleSubmit(event) {
-    this.setState({ loading: true });
+    if (this.data[this.state.value] == undefined) {
+      this.setState({ loading: true });
 
-    this.data[this.state.value] = {};
+      this.data[this.state.value] = {};
 
-    console.log(this.data);
+      console.log(this.data);
 
-    driveUpdate("question.json", this.data).then(res => {
-      this.props.handleDialog.close(
-        <QuestionPage handleDialog={this.props.handleDialog} />
+      driveUpdate("question.json", this.data).then(res => {
+        this.props.handleDialog.close(
+          <QuestionPage handleDialog={this.props.handleDialog} />
+        );
+      });
+    } else {
+      this.props.handleDialog.open(
+        <div style={{ fontSize: 18, marginBottom: 15 }}>
+          มีข้อสอบชื่อนี้อยู่แล้ว โปรดใช้ชื่ออื่น
+          <br />
+          <br />
+          <button
+            className="Button"
+            onClick={() => this.props.handleDialog.close()}
+          >
+            ตกลง
+          </button>
+        </div>
       );
-    });
+    }
 
     event.preventDefault();
   }
@@ -93,7 +109,15 @@ class QuestionDelete extends React.Component {
     this.props.handleUpdate(this.data);
 
     driveUpdate("question.json", this.data).then(res => {
-      this.props.handleDialog.close();
+      driveGet("result.json").then(res => {
+        let finalResult = res;
+        delete finalResult[this.props.title];
+        console.log(finalResult);
+
+        driveUpdate("result.json", JSON.stringify(finalResult)).then(res => {
+          this.props.handleDialog.close();
+        });
+      });
     });
   }
 

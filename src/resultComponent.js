@@ -13,6 +13,7 @@ class ResultPage extends React.Component {
       <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังโหลด ﱰ</div>
     );
     driveGet("result.json").then(res => {
+      console.log(res);
       this.setState({ body: res });
       this.props.handleDialog.close();
     });
@@ -59,10 +60,10 @@ class ResultPage extends React.Component {
           <div style={{ padding: "10px" }}>
             <span className="resultBorder">ผู้เข้าสอบทั้งหมด {total} คน</span>{" "}
             <span className="resultBorder">เฉลี่ย {avg}</span>{" "}
-            <span className="resultBorder">คะแนนสูงสุด {sortedScore[0]}</span>{" "}
             <span className="resultBorder">
-              คะแนนต่ำสุด {sortedScore[sortedScore.length - 1]}
+              คะแนนสูงสุด {sortedScore[sortedScore.length - 1]}
             </span>{" "}
+            <span className="resultBorder">คะแนนต่ำสุด {sortedScore[0]}</span>{" "}
             <button
               onClick={() =>
                 this.props.handleDialog.open(

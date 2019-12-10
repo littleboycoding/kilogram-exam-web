@@ -254,16 +254,35 @@ var CreateStudent = function (_React$Component3) {
     value: function handleSubmit(event) {
       var _this8 = this;
 
-      this.setState({ loading: true });
+      if (this.data[this.state.id] == undefined) {
+        this.setState({ loading: true });
 
-      this.data[this.state.id] = this.state.name;
+        this.data[this.state.id] = this.state.name;
 
-      console.log(this.data);
+        console.log(this.data);
 
-      driveUpdate("student.json", this.data).then(function (res) {
-        return _this8.props.handleDialog.close(React.createElement(StudentPage, { handleDialog: _this8.props.handleDialog }));
-      });
-
+        driveUpdate("student.json", this.data).then(function (res) {
+          return _this8.props.handleDialog.close(React.createElement(StudentPage, { handleDialog: _this8.props.handleDialog }));
+        });
+      } else {
+        this.props.handleDialog.open(React.createElement(
+          "div",
+          { style: { fontSize: 18, marginBottom: 15 } },
+          "\u0E21\u0E35\u0E23\u0E2B\u0E31\u0E2A\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19\u0E19\u0E35\u0E49\u0E2D\u0E22\u0E39\u0E48\u0E41\u0E25\u0E49\u0E27 \u0E01\u0E23\u0E38\u0E13\u0E32\u0E43\u0E0A\u0E49\u0E2B\u0E21\u0E32\u0E22\u0E40\u0E25\u0E02\u0E2D\u0E37\u0E48\u0E19",
+          React.createElement("br", null),
+          React.createElement("br", null),
+          React.createElement(
+            "button",
+            {
+              className: "Button",
+              onClick: function onClick() {
+                return _this8.props.handleDialog.close();
+              }
+            },
+            "\u0E15\u0E01\u0E25\u0E07"
+          )
+        ));
+      }
       event.preventDefault();
     }
   }, {
