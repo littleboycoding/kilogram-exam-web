@@ -1,4 +1,4 @@
-import { driveGet, driveUpdate } from "/drive.js";
+import { driveGet, driveUpdate } from "../drive.js";
 
 export class ResultPage extends React.Component {
   constructor(props) {

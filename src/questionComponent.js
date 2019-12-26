@@ -1,4 +1,4 @@
-import { driveGet, driveUpdate } from "/drive.js";
+import { driveGet, driveUpdate } from "../drive.js";
 var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
 
 class CreateNewQuestion extends React.Component {
