@@ -618,24 +618,24 @@ function questionPrint(data) {
       map +
       ". " +
       data[map]["title"] +
-      "</p><table>" +
+      "</p>" +
       Object.keys(data[map]["answer"])
         .map(maps =>
           data[map]["answer"][maps]
-            ? "<tr><td>" +
+            ? "<div style='margin-bottom: 10px; width: 50%; float: left;'>" +
               markName[maps] +
-              ".</td><td>" +
+              ". " +
               data[map]["answer"][maps] +
-              "</td></tr>" +
+              "" +
               (data[map]["choice_img"][maps]
-                ? "<tr><td></td><td><img src='" +
+                ? "<br /><img src='" +
                   data[map]["choice_img"][maps] +
-                  "' style='max-height: 100px;' /></td></tr>"
-                : "")
+                  "' style='max-height: 100px;' /></div>"
+                : "</div>")
             : ""
         )
         .join("") +
-      "</table><br/>"
+      "<br style='clear: both;' />"
     );
   });
 
@@ -643,7 +643,7 @@ function questionPrint(data) {
 
   printWindow.document.write(
     "<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
-      htmlResult.join("<hr>") +
+      htmlResult.join("<hr >") +
       "<script>setTimeout(() => print(), 1000);</script></body>"
   );
 }

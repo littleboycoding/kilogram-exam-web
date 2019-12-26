@@ -792,12 +792,12 @@ function questionPrint(data) {
   var dataListed = Object.keys(data);
   var htmlResult = dataListed.map(function (map) {
     //return data[map]["title"] + data[map]["answer"];
-    return (data[map]["question_img"] ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" + data[map]["question_img"] + "' />" : "") + "<p>" + map + ". " + data[map]["title"] + "</p><table>" + Object.keys(data[map]["answer"]).map(function (maps) {
-      return data[map]["answer"][maps] ? "<tr><td>" + markName[maps] + ".</td><td>" + data[map]["answer"][maps] + "</td></tr>" + (data[map]["choice_img"][maps] ? "<tr><td></td><td><img src='" + data[map]["choice_img"][maps] + "' style='max-height: 100px;' /></td></tr>" : "") : "";
-    }).join("") + "</table><br/>";
+    return (data[map]["question_img"] ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" + data[map]["question_img"] + "' />" : "") + "<p>" + map + ". " + data[map]["title"] + "</p>" + Object.keys(data[map]["answer"]).map(function (maps) {
+      return data[map]["answer"][maps] ? "<div style='margin-bottom: 10px; width: 50%; float: left;'>" + markName[maps] + ". " + data[map]["answer"][maps] + "" + (data[map]["choice_img"][maps] ? "<br /><img src='" + data[map]["choice_img"][maps] + "' style='max-height: 100px;' /></div>" : "</div>") : "";
+    }).join("") + "<br style='clear: both;' />";
   });
 
   var printWindow = window.open("", "printWindow");
 
-  printWindow.document.write("<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" + htmlResult.join("<hr>") + "<script>setTimeout(() => print(), 1000);</script></body>");
+  printWindow.document.write("<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" + htmlResult.join("<hr >") + "<script>setTimeout(() => print(), 1000);</script></body>");
 }
