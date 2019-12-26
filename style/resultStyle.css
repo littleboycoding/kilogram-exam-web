@@ -1,0 +1,15 @@
+.resultStudent th {
+  background-color: #809ee8;
+  color: white;
+}
+.resultStudent td {
+  border-bottom: 1px solid #ccc;
+}
+.resultStudent th,
+td {
+  padding: 5px;
+}
+.resultStudent {
+  margin-top: 5px;
+  width: 25%;
+}
