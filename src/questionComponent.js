@@ -1,5 +1,5 @@
-const { ipcRenderer } = require("electron");
-const { driveGet, driveUpdate } = require("../drive");
+import { driveGet, driveUpdate } from "/drive.js";
+var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
 
 class CreateNewQuestion extends React.Component {
   constructor(props) {
@@ -22,8 +22,6 @@ class CreateNewQuestion extends React.Component {
       this.setState({ loading: true });
 
       this.data[this.state.value] = {};
-
-      console.log(this.data);
 
       driveUpdate("question.json", this.data).then(res => {
         this.props.handleDialog.close(
@@ -110,13 +108,20 @@ class QuestionDelete extends React.Component {
 
     driveUpdate("question.json", this.data).then(res => {
       driveGet("result.json").then(res => {
+        console.log(res, this.props.title);
         let finalResult = res;
-        delete finalResult[this.props.title];
-        console.log(finalResult);
-
-        driveUpdate("result.json", JSON.stringify(finalResult)).then(res => {
+        if (
+          finalResult != false &&
+          finalResult[this.props.title] &&
+          Object.keys(finalResult).length > 0
+        ) {
+          delete finalResult[this.props.title];
+          driveUpdate("result.json", finalResult).then(res => {
+            this.props.handleDialog.close();
+          });
+        } else {
           this.props.handleDialog.close();
-        });
+        }
       });
     });
   }
@@ -144,7 +149,7 @@ class QuestionDelete extends React.Component {
   }
 }
 
-class QuestionPage extends React.Component {
+export class QuestionPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -158,6 +163,7 @@ class QuestionPage extends React.Component {
     this.props.handleDialog.open(
       <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังโหลด ﱰ</div>
     );
+
     driveGet("question.json").then(res => {
       this.setState({ data: res });
       this.props.handleDialog.close();
@@ -202,7 +208,6 @@ class QuestionPage extends React.Component {
 function QuestionListPage(props) {
   let result = [];
   for (const key of Object.keys(props.data)) {
-    console.log(props.data[key]);
     result.push(
       <div key={key} className="dataBorder">
         <div className="questionTitle">﫳 {key}</div>
@@ -226,14 +231,14 @@ function QuestionListPage(props) {
           ลบ
         </div>
         <div
-          onClick={() => ipcRenderer.send("print", props.data[key])}
+          onClick={() => questionPrint(props.data[key])}
           style={{
             width: "calc(100% / 2 - 25px)",
             borderLeft: "1px solid #CCC"
           }}
           className="Button"
         >
-           พิมพ์
+           พิมพ์
         </div>
         <div
           onClick={() =>
@@ -250,7 +255,7 @@ function QuestionListPage(props) {
             width: "calc(100% / 2 - 25px)"
           }}
         >
-           แก้ไขข้อมูล
+           แก้ไขข้อมูล
         </div>
         <br style={{ clear: "both" }} />
       </div>
@@ -274,6 +279,7 @@ class QuestionEditPage extends React.Component {
     this.handleCorrect = this.handleCorrect.bind(this);
     this.handleDeleteQuestion = this.handleDeleteQuestion.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.addFile = this.addFile.bind(this);
   }
 
   static resizeTextarea(event) {
@@ -298,8 +304,7 @@ class QuestionEditPage extends React.Component {
 
   handleDeleteQuestion(question_no) {
     let thisQuestion = Object.assign({}, this.state.data);
-    for (i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
-      console.log(i, Object.keys(thisQuestion)[i]);
+    for (let i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
       Object.defineProperty(
         thisQuestion,
         i,
@@ -343,7 +348,9 @@ class QuestionEditPage extends React.Component {
         [Object.keys(state.data).length + 1]: {
           answer: { 1: "", 2: "", 3: "", 4: "", 5: "" },
           correct: null,
-          title: "New Question"
+          title: "New Question",
+          choice_img: { 1: "", 2: "", 3: "", 4: "", 5: "" },
+          question_img: ""
         }
       });
       return {
@@ -368,10 +375,32 @@ class QuestionEditPage extends React.Component {
     });
   }
 
+  addFile(event, question_no, choice) {
+    let reader = new FileReader();
+    reader.onload = e => {
+      let thisQuestion = Object.assign({}, this.state.data);
+      if (choice) {
+        thisQuestion[question_no]["choice_img"][choice] = e.target.result;
+      } else {
+        thisQuestion[question_no]["question_img"] = e.target.result;
+      }
+      this.setState({
+        data: thisQuestion
+      });
+    };
+    reader.readAsDataURL(event.target.files[0]);
+  }
+
   render() {
     const examName = Object.keys(this.state.data);
     return (
       <div>
+        <input
+          type="file"
+          id="image"
+          accept="image/*"
+          style={{ display: "none" }}
+        />
         <div
           className="dataBorder"
           style={{ marginTop: 0, backgroundColor: "white", padding: 10 }}
@@ -406,7 +435,7 @@ class QuestionEditPage extends React.Component {
           const question = this.state.data[question_no];
           return (
             <div className="dataBorder" key={question_no}>
-              <div className="questionTitle">
+              <div className="questionTitle" style={{ position: "relative" }}>
                 <div style={{ width: 33, display: "inline-block" }}>
                   {question_no}.{" "}
                 </div>
@@ -423,6 +452,33 @@ class QuestionEditPage extends React.Component {
                   autoFocus={true}
                   placeholder="คำถาม..."
                 />
+                <input
+                  type="file"
+                  id={"questionImg" + question_no}
+                  onInput={() => this.addFile(event, question_no)}
+                  style={{ display: "none" }}
+                />
+                <div
+                  onClick={() =>
+                    document.getElementById("questionImg" + question_no).click()
+                  }
+                  className="Button AddImage"
+                  style={{ right: "60px" }}
+                >
+                  <img
+                    style={{
+                      position: "absolute",
+                      right: "0",
+                      top: "0",
+                      width: "41px",
+                      height: "41px",
+                      objectFit: "contain",
+                      display: question["question_img"] != "" ? "block" : "none"
+                    }}
+                    src={question["question_img"]}
+                  />
+                  <span></span>
+                </div>
                 <div
                   onClick={() => this.handleDeleteQuestion(question_no)}
                   className="Button Danger OperateButton"
@@ -436,6 +492,7 @@ class QuestionEditPage extends React.Component {
                 question_no={question_no}
                 handleTab={this.handleTab}
                 handleChange={this.handleAnswerChange}
+                addFile={this.addFile}
               />
             </div>
           );
@@ -452,9 +509,16 @@ function EditAnswer(props) {
   return (
     <ol className="questionAnswer">
       {Object.keys(props.question["answer"]).map(choice => (
-        <li key={choice}>
+        <li style={{ position: "relative" }} key={choice}>
+          <input
+            type="file"
+            onInput={() => props.addFile(event, props.question_no, choice)}
+            style={{ display: "none" }}
+            id={"file" + props.question_no + choice}
+            accept="image/*"
+          />
           <textarea
-            style={{ width: "calc(100% - 50px)" }}
+            style={{ width: "calc(100% - 90px)" }}
             onChange={() => {
               QuestionEditPage.resizeTextarea(event);
               props.handleChange(props.question_no, choice, event);
@@ -468,6 +532,30 @@ function EditAnswer(props) {
             onKeyDown={() => props.handleTab(props.question_no, choice, event)}
             placeholder={"คำตอบข้อ " + props.question_no}
           />
+          <div
+            onClick={() =>
+              document
+                .getElementById("file" + props.question_no + choice)
+                .click()
+            }
+            className="Button AddImage"
+          >
+            <img
+              id={"img" + props.question_no + choice}
+              style={{
+                position: "absolute",
+                right: "0",
+                top: "0",
+                width: "41px",
+                height: "41px",
+                objectFit: "contain",
+                display:
+                  props.question["choice_img"][choice] != "" ? "block" : "none"
+              }}
+              src={props.question["choice_img"][choice]}
+            />
+            <span></span>
+          </div>
           {choice == props.question["correct"] ? (
             <div className="Button OperateButton CorrectButton Corrected">
               <span></span>
@@ -516,4 +604,46 @@ function UnsaveExitConfirm(props) {
   );
 }
 
-module.exports.QuestionPage = QuestionPage;
+function questionPrint(data) {
+  const dataListed = Object.keys(data);
+  let htmlResult = dataListed.map(map => {
+    //return data[map]["title"] + data[map]["answer"];
+    return (
+      (data[map]["question_img"]
+        ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" +
+          data[map]["question_img"] +
+          "' />"
+        : "") +
+      "<p>" +
+      map +
+      ". " +
+      data[map]["title"] +
+      "</p><table>" +
+      Object.keys(data[map]["answer"])
+        .map(maps =>
+          data[map]["answer"][maps]
+            ? "<tr><td>" +
+              markName[maps] +
+              ".</td><td>" +
+              data[map]["answer"][maps] +
+              "</td></tr>" +
+              (data[map]["choice_img"][maps]
+                ? "<tr><td></td><td><img src='" +
+                  data[map]["choice_img"][maps] +
+                  "' style='max-height: 100px;' /></td></tr>"
+                : "")
+            : ""
+        )
+        .join("") +
+      "</table><br/>"
+    );
+  });
+
+  let printWindow = window.open("", "printWindow");
+
+  printWindow.document.write(
+    "<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
+      htmlResult.join("<hr>") +
+      "<script>setTimeout(() => print(), 1000);</script></body>"
+  );
+}

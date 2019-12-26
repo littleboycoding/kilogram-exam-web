@@ -8,12 +8,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var _require = require("electron"),
-    ipcRenderer = _require.ipcRenderer;
-
-var _require2 = require("../drive"),
-    driveGet = _require2.driveGet,
-    driveUpdate = _require2.driveUpdate;
+import { driveGet, driveUpdate } from "/drive.js";
+var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
 
 var CreateNewQuestion = function (_React$Component) {
   _inherits(CreateNewQuestion, _React$Component);
@@ -47,8 +43,6 @@ var CreateNewQuestion = function (_React$Component) {
         this.setState({ loading: true });
 
         this.data[this.state.value] = {};
-
-        console.log(this.data);
 
         driveUpdate("question.json", this.data).then(function (res) {
           _this2.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this2.props.handleDialog }));
@@ -161,13 +155,16 @@ var QuestionDelete = function (_React$Component2) {
 
       driveUpdate("question.json", this.data).then(function (res) {
         driveGet("result.json").then(function (res) {
+          console.log(res, _this5.props.title);
           var finalResult = res;
-          delete finalResult[_this5.props.title];
-          console.log(finalResult);
-
-          driveUpdate("result.json", JSON.stringify(finalResult)).then(function (res) {
+          if (finalResult != false && finalResult[_this5.props.title] && Object.keys(finalResult).length > 0) {
+            delete finalResult[_this5.props.title];
+            driveUpdate("result.json", finalResult).then(function (res) {
+              _this5.props.handleDialog.close();
+            });
+          } else {
             _this5.props.handleDialog.close();
-          });
+          }
         });
       });
     }
@@ -213,7 +210,7 @@ var QuestionDelete = function (_React$Component2) {
   return QuestionDelete;
 }(React.Component);
 
-var QuestionPage = function (_React$Component3) {
+export var QuestionPage = function (_React$Component3) {
   _inherits(QuestionPage, _React$Component3);
 
   function QuestionPage(props) {
@@ -239,6 +236,7 @@ var QuestionPage = function (_React$Component3) {
         { style: { fontSize: 20, marginBottom: 15 } },
         "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14 \uFC70"
       ));
+
       driveGet("question.json").then(function (res) {
         _this8.setState({ data: res });
         _this8.props.handleDialog.close();
@@ -292,7 +290,6 @@ function QuestionListPage(props) {
   var result = [];
 
   var _loop = function _loop(key) {
-    console.log(props.data[key]);
     result.push(React.createElement(
       "div",
       { key: key, className: "dataBorder" },
@@ -329,7 +326,7 @@ function QuestionListPage(props) {
         "div",
         {
           onClick: function onClick() {
-            return ipcRenderer.send("print", props.data[key]);
+            return questionPrint(props.data[key]);
           },
           style: {
             width: "calc(100% / 2 - 25px)",
@@ -337,7 +334,7 @@ function QuestionListPage(props) {
           },
           className: "Button"
         },
-        "\uF044 \u0E1E\u0E34\u0E21\u0E1E\u0E4C"
+        "\uF02F \u0E1E\u0E34\u0E21\u0E1E\u0E4C"
       ),
       React.createElement(
         "div",
@@ -354,7 +351,7 @@ function QuestionListPage(props) {
             width: "calc(100% / 2 - 25px)"
           }
         },
-        "\uF02F \u0E41\u0E01\u0E49\u0E44\u0E02\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25"
+        "\uF044 \u0E41\u0E01\u0E49\u0E44\u0E02\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25"
       ),
       React.createElement("br", { style: { clear: "both" } })
     ));
@@ -408,6 +405,7 @@ var QuestionEditPage = function (_React$Component4) {
     _this10.handleCorrect = _this10.handleCorrect.bind(_this10);
     _this10.handleDeleteQuestion = _this10.handleDeleteQuestion.bind(_this10);
     _this10.handleSubmit = _this10.handleSubmit.bind(_this10);
+    _this10.addFile = _this10.addFile.bind(_this10);
     return _this10;
   }
 
@@ -433,8 +431,7 @@ var QuestionEditPage = function (_React$Component4) {
     key: "handleDeleteQuestion",
     value: function handleDeleteQuestion(question_no) {
       var thisQuestion = Object.assign({}, this.state.data);
-      for (i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
-        console.log(i, Object.keys(thisQuestion)[i]);
+      for (var i = question_no; i <= Object.keys(thisQuestion).length - 1; i++) {
         Object.defineProperty(thisQuestion, i, Object.getOwnPropertyDescriptor(thisQuestion, Object.keys(thisQuestion)[i]));
       }
       var lastData = Object.keys(thisQuestion)[Object.keys(thisQuestion).length - 1];
@@ -467,7 +464,9 @@ var QuestionEditPage = function (_React$Component4) {
         var data = Object.assign(state.data, _defineProperty({}, Object.keys(state.data).length + 1, {
           answer: { 1: "", 2: "", 3: "", 4: "", 5: "" },
           correct: null,
-          title: "New Question"
+          title: "New Question",
+          choice_img: { 1: "", 2: "", 3: "", 4: "", 5: "" },
+          question_img: ""
         }));
         return {
           data: data
@@ -493,14 +492,39 @@ var QuestionEditPage = function (_React$Component4) {
       });
     }
   }, {
+    key: "addFile",
+    value: function addFile(event, question_no, choice) {
+      var _this12 = this;
+
+      var reader = new FileReader();
+      reader.onload = function (e) {
+        var thisQuestion = Object.assign({}, _this12.state.data);
+        if (choice) {
+          thisQuestion[question_no]["choice_img"][choice] = e.target.result;
+        } else {
+          thisQuestion[question_no]["question_img"] = e.target.result;
+        }
+        _this12.setState({
+          data: thisQuestion
+        });
+      };
+      reader.readAsDataURL(event.target.files[0]);
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this12 = this;
+      var _this13 = this;
 
       var examName = Object.keys(this.state.data);
       return React.createElement(
         "div",
         null,
+        React.createElement("input", {
+          type: "file",
+          id: "image",
+          accept: "image/*",
+          style: { display: "none" }
+        }),
         React.createElement(
           "div",
           {
@@ -525,10 +549,10 @@ var QuestionEditPage = function (_React$Component4) {
             "div",
             {
               onClick: function onClick() {
-                if (_this12.props.data[_this12.props.title] != _this12.state.data) {
-                  _this12.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this12.props.handleDialog }));
+                if (_this13.props.data[_this13.props.title] != _this13.state.data) {
+                  _this13.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this13.props.handleDialog }));
                 } else {
-                  _this12.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this12.props.handleDialog }));
+                  _this13.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this13.props.handleDialog }));
                 }
               },
               style: { marginRight: 8, marginTop: "-5px", borderRadius: 2 },
@@ -538,13 +562,13 @@ var QuestionEditPage = function (_React$Component4) {
           )
         ),
         examName.map(function (question_no) {
-          var question = _this12.state.data[question_no];
+          var question = _this13.state.data[question_no];
           return React.createElement(
             "div",
             { className: "dataBorder", key: question_no },
             React.createElement(
               "div",
-              { className: "questionTitle" },
+              { className: "questionTitle", style: { position: "relative" } },
               React.createElement(
                 "div",
                 { style: { width: 33, display: "inline-block" } },
@@ -556,7 +580,7 @@ var QuestionEditPage = function (_React$Component4) {
                 className: "questionTitleInput",
                 onChange: function onChange() {
                   QuestionEditPage.resizeTextarea(event);
-                  _this12.handleTitleChange(question_no, event);
+                  _this13.handleTitleChange(question_no, event);
                 },
                 onFocus: function onFocus() {
                   QuestionEditPage.resizeTextarea(event);
@@ -565,11 +589,46 @@ var QuestionEditPage = function (_React$Component4) {
                 autoFocus: true,
                 placeholder: "\u0E04\u0E33\u0E16\u0E32\u0E21..."
               }),
+              React.createElement("input", {
+                type: "file",
+                id: "questionImg" + question_no,
+                onInput: function onInput() {
+                  return _this13.addFile(event, question_no);
+                },
+                style: { display: "none" }
+              }),
               React.createElement(
                 "div",
                 {
                   onClick: function onClick() {
-                    return _this12.handleDeleteQuestion(question_no);
+                    return document.getElementById("questionImg" + question_no).click();
+                  },
+                  className: "Button AddImage",
+                  style: { right: "60px" }
+                },
+                React.createElement("img", {
+                  style: {
+                    position: "absolute",
+                    right: "0",
+                    top: "0",
+                    width: "41px",
+                    height: "41px",
+                    objectFit: "contain",
+                    display: question["question_img"] != "" ? "block" : "none"
+                  },
+                  src: question["question_img"]
+                }),
+                React.createElement(
+                  "span",
+                  null,
+                  "\uF1C5"
+                )
+              ),
+              React.createElement(
+                "div",
+                {
+                  onClick: function onClick() {
+                    return _this13.handleDeleteQuestion(question_no);
                   },
                   className: "Button Danger OperateButton"
                 },
@@ -581,11 +640,12 @@ var QuestionEditPage = function (_React$Component4) {
               )
             ),
             React.createElement(EditAnswer, {
-              handleCorrect: _this12.handleCorrect,
+              handleCorrect: _this13.handleCorrect,
               question: question,
               question_no: question_no,
-              handleTab: _this12.handleTab,
-              handleChange: _this12.handleAnswerChange
+              handleTab: _this13.handleTab,
+              handleChange: _this13.handleAnswerChange,
+              addFile: _this13.addFile
             })
           );
         }),
@@ -614,9 +674,18 @@ function EditAnswer(props) {
     Object.keys(props.question["answer"]).map(function (choice) {
       return React.createElement(
         "li",
-        { key: choice },
+        { style: { position: "relative" }, key: choice },
+        React.createElement("input", {
+          type: "file",
+          onInput: function onInput() {
+            return props.addFile(event, props.question_no, choice);
+          },
+          style: { display: "none" },
+          id: "file" + props.question_no + choice,
+          accept: "image/*"
+        }),
         React.createElement("textarea", {
-          style: { width: "calc(100% - 50px)" },
+          style: { width: "calc(100% - 90px)" },
           onChange: function onChange() {
             QuestionEditPage.resizeTextarea(event);
             props.handleChange(props.question_no, choice, event);
@@ -632,6 +701,33 @@ function EditAnswer(props) {
           },
           placeholder: "คำตอบข้อ " + props.question_no
         }),
+        React.createElement(
+          "div",
+          {
+            onClick: function onClick() {
+              return document.getElementById("file" + props.question_no + choice).click();
+            },
+            className: "Button AddImage"
+          },
+          React.createElement("img", {
+            id: "img" + props.question_no + choice,
+            style: {
+              position: "absolute",
+              right: "0",
+              top: "0",
+              width: "41px",
+              height: "41px",
+              objectFit: "contain",
+              display: props.question["choice_img"][choice] != "" ? "block" : "none"
+            },
+            src: props.question["choice_img"][choice]
+          }),
+          React.createElement(
+            "span",
+            null,
+            "\uF1C5"
+          )
+        ),
         choice == props.question["correct"] ? React.createElement(
           "div",
           { className: "Button OperateButton CorrectButton Corrected" },
@@ -692,4 +788,16 @@ function UnsaveExitConfirm(props) {
   );
 }
 
-module.exports.QuestionPage = QuestionPage;
+function questionPrint(data) {
+  var dataListed = Object.keys(data);
+  var htmlResult = dataListed.map(function (map) {
+    //return data[map]["title"] + data[map]["answer"];
+    return (data[map]["question_img"] ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" + data[map]["question_img"] + "' />" : "") + "<p>" + map + ". " + data[map]["title"] + "</p><table>" + Object.keys(data[map]["answer"]).map(function (maps) {
+      return data[map]["answer"][maps] ? "<tr><td>" + markName[maps] + ".</td><td>" + data[map]["answer"][maps] + "</td></tr>" + (data[map]["choice_img"][maps] ? "<tr><td></td><td><img src='" + data[map]["choice_img"][maps] + "' style='max-height: 100px;' /></td></tr>" : "") : "";
+    }).join("") + "</table><br/>";
+  });
+
+  var printWindow = window.open("", "printWindow");
+
+  printWindow.document.write("<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" + htmlResult.join("<hr>") + "<script>setTimeout(() => print(), 1000);</script></body>");
+}

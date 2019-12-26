@@ -1,58 +1,28 @@
-var fileUploaded = {};
 var fileList = {
   "result.json": { body: {} },
   "student.json": { body: {} },
-  "question.json": {
-    body: {
-      ตัวอย่างข้อสอบ: {
-        1: {
-          title: "คำถามข้อแรก",
-          answer: {
-            1: "ใช่",
-            2: "ไม่ใช่",
-            3: "ใช่ทั้งหมด",
-            4: "ไม่มีข้อที่ถูก",
-            5: "ถูกทั้งหมด",
-          },
-          correct: 1
-        }
-      }
-    }
-  }
+  "question.json": { body: {} }
 };
-
-function createInitialFile(drive) {
+export function createInitialFile() {
   return new Promise(async (resolve, eject) => {
     for (const key of Object.keys(fileList)) {
-      await creatingProcess(key, fileList[key]["body"], drive).then(
-        res => (fileUploaded[key] = res.data.id)
-      );
+      await creatingProcess(key, fileList[key]["body"]);
     }
-    require("fs").writeFile(
-      "fileID.json",
-      JSON.stringify(fileUploaded),
-      err => {
-        if (err) console.log(err);
-        resolve();
-      }
-    );
+    resolve();
   });
 }
 
-function creatingProcess(fileName, body, drive) {
+function creatingProcess(fileName, body) {
   var fileMetadata = {
     name: fileName,
     parents: ["appDataFolder"]
   };
   var media = {
     mimeType: "application/json",
-    body: JSON.stringify(body)
+    body: body
   };
-  return drive.files.create({
+  return gapi.client.drive.files.create({
     resource: fileMetadata,
-    media: media,
-    fields: "id"
+    fields: "id, name"
   });
 }
-
-module.exports.createInitialFile = createInitialFile;

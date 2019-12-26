@@ -6,81 +6,42 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var _require = require("electron"),
-    ipcRenderer = _require.ipcRenderer;
+import { QuestionPage } from "./questionComponent.js";
+import { StudentPage } from "./studentComponent.js";
+import { ResultPage } from "./resultComponent.js";
 
-var _require2 = require("googleapis"),
-    google = _require2.google;
+function Account(props) {
+  return React.createElement(
+    "span",
+    {
+      onClick: function onClick() {
+        return props.handleDialog.open(React.createElement(LogoutDialog, { handleDialog: props.handleDialog }));
+      },
+      className: "profileArea",
+      id: "account"
+    },
+    React.createElement("img", {
+      style: { height: "20px", borderRadius: "50%" },
+      align: "center",
+      src: props.userInfo.img
+    }),
+    React.createElement(
+      "span",
+      { id: "account_detail" },
+      " ",
+      props.userInfo.name
+    )
+  );
+}
 
-// Component for each section of Kilogram Exam desktop
-
-
-var _require3 = require("./component/questionComponent.js"),
-    QuestionPage = _require3.QuestionPage;
-
-var _require4 = require("./component/studentComponent.js"),
-    StudentPage = _require4.StudentPage;
-
-var _require5 = require("./component/resultComponent.js"),
-    ResultPage = _require5.ResultPage;
-
-var Account = function (_React$Component) {
-  _inherits(Account, _React$Component);
-
-  function Account(props) {
-    _classCallCheck(this, Account);
-
-    var _this = _possibleConstructorReturn(this, (Account.__proto__ || Object.getPrototypeOf(Account)).call(this, props));
-
-    _this.state = {
-      userImage: null,
-      displayName: null,
-      email: null
-    };
-    ipcRenderer.on("userInfo", function (event, res) {
-      _this.setState({
-        userImage: res.data.photos[0].url,
-        displayName: res.data.names[0].displayName,
-        email: res.data.emailAddresses[0].value
-      });
-    });
-    return _this;
-  }
-
-  _createClass(Account, [{
-    key: "render",
-    value: function render() {
-      var _this2 = this;
-
-      return React.createElement(
-        "span",
-        {
-          onClick: function onClick() {
-            return _this2.props.handleDialog.open(React.createElement(LogoutDialog, { handleDialog: _this2.props.handleDialog }));
-          },
-          className: "profileArea",
-          id: "account"
-        },
-        React.createElement("img", {
-          style: { height: "20px", borderRadius: "50%" },
-          align: "center",
-          src: this.state.userImage
-        }),
-        React.createElement(
-          "span",
-          { id: "account_detail" },
-          " ",
-          this.state.displayName
-        )
-      );
-    }
-  }]);
-
-  return Account;
-}(React.Component);
-
-function Logout() {
-  ipcRenderer.send("logout");
+function Logout(dialog) {
+  dialog.open(React.createElement(
+    "div",
+    null,
+    "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2D\u0E2D\u0E01\u0E08\u0E32\u0E01\u0E23\u0E30\u0E1A\u0E1A..."
+  ));
+  gapi.auth2.getAuthInstance().signOut();
+  location.reload();
 }
 
 function LogoutDialog(props) {
@@ -102,7 +63,9 @@ function LogoutDialog(props) {
       value: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01"
     }),
     React.createElement("input", {
-      onClick: Logout,
+      onClick: function onClick() {
+        return Logout(props.handleDialog);
+      },
       type: "button",
       className: "Button Danger",
       value: "\u0E22\u0E37\u0E19\u0E22\u0E31\u0E19"
@@ -116,7 +79,7 @@ function Header(props) {
     { id: "header" },
     props.value,
     " ",
-    React.createElement(Account, { handleDialog: props.handleDialog })
+    React.createElement(Account, { userInfo: props.userInfo, handleDialog: props.handleDialog })
   );
 }
 
@@ -187,7 +150,11 @@ function ContentContainer(props) {
   return React.createElement(
     "div",
     { id: "content_container" },
-    React.createElement(Header, { handleDialog: props.handleDialog, value: props.activePage }),
+    React.createElement(Header, {
+      userInfo: props.userInfo,
+      handleDialog: props.handleDialog,
+      value: props.activePage
+    }),
     React.createElement(
       "div",
       { className: "content" },
@@ -208,100 +175,110 @@ function Dialog(props) {
   );
 }
 
-var SignIn_Button = function (_React$Component2) {
-  _inherits(SignIn_Button, _React$Component2);
+function SignIn_Button() {
+  return React.createElement("div", { id: "signin-button", className: "g-signin2" });
+}
 
-  function SignIn_Button(props) {
-    _classCallCheck(this, SignIn_Button);
-
-    var _this3 = _possibleConstructorReturn(this, (SignIn_Button.__proto__ || Object.getPrototypeOf(SignIn_Button)).call(this, props));
-
-    _this3.state = {
-      hovering: false
-    };
-    return _this3;
-  }
-
-  _createClass(SignIn_Button, [{
-    key: "render",
-    value: function render() {
-      var _this4 = this;
-
-      return React.createElement("img", {
-        className: "hover_pointer",
-        onMouseOver: function onMouseOver() {
-          return _this4.setState({ hovering: true });
-        },
-        onMouseOut: function onMouseOut() {
-          return _this4.setState({ hovering: false });
-        },
-        onClick: function onClick() {
-          ipcRenderer.send(_this4.props.signinMethod);
-        },
-        src: !this.state.hovering ? this.props.src : this.props.srcHover
-      });
-    }
-  }]);
-
-  return SignIn_Button;
-}(React.Component);
-
-var Container = function (_React$Component3) {
-  _inherits(Container, _React$Component3);
+var Container = function (_React$Component) {
+  _inherits(Container, _React$Component);
 
   function Container(props) {
     _classCallCheck(this, Container);
 
-    var _this5 = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Container.__proto__ || Object.getPrototypeOf(Container)).call(this, props));
 
-    _this5.handleDialog = {
+    _this.handleDialog = {
       open: function open(msg) {
-        _this5.setState({ dialogShown: true, dialogContent: msg });
+        _this.setState({ dialogShown: true, dialogContent: msg });
       },
       close: function close(res) {
-        _this5.setState({
+        _this.setState({
           dialogShown: false,
-          pageContent: res ? null : _this5.state.pageContent
+          pageContent: res ? null : _this.state.pageContent
         });
-        _this5.setState({
-          pageContent: res ? res : _this5.state.pageContent
+        _this.setState({
+          pageContent: res ? res : _this.state.pageContent
         });
       }
     };
 
-    _this5.menu = {
+    _this.menu = {
       "ﴕ ข้อสอบ": {
-        page: React.createElement(QuestionPage, { handleDialog: _this5.handleDialog })
+        page: React.createElement(QuestionPage, { handleDialog: _this.handleDialog })
       },
-      " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this5.handleDialog }) },
-      " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this5.handleDialog }) }
+      " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this.handleDialog }) },
+      " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this.handleDialog }) }
     };
 
-    _this5.state = {
-      menuList: _this5.menu,
+    _this.state = {
+      menuList: _this.menu,
       activePage: null,
       pageContent: null,
       dialogShown: true,
-      dialogContent: React.createElement(SignIn_Button, {
-        src: "google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png",
-        srcHover: "google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png",
-        signinMethod: "googleSignin"
-      })
+      dialogContent: React.createElement(SignIn_Button, null),
+      userInfo: { name: "", email: "", img: "" }
     };
-    _this5.handleClick = _this5.handleClick.bind(_this5);
-    _this5.handleDialog.open = _this5.handleDialog.open.bind(_this5);
-    _this5.handleDialog.close = _this5.handleDialog.close.bind(_this5);
 
-    ipcRenderer.on("signInSuccess", function (event) {
-      _this5.setState({
-        dialogShown: false
+    gapi.load("client:auth2", function () {
+      gapi.client.init({
+        apiKey: "AIzaSyDN1w4HgvGe0ytbOUJ6T10i5ymjW9j0qE0",
+        clientId: "613633799370-oq1j8j8te4nlb01hd2srbsqhg8vmnh8d.apps.googleusercontent.com",
+        scope: "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appfolder https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+        discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/drive/v3/rest", "https://people.googleapis.com/$discovery/rest?version=v1"]
+      }).then(function () {
+        gapi.auth2.getAuthInstance().isSignedIn.listen(_this.isSignIn);
+        var profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+        _this.setState({
+          userInfo: {
+            name: profile.getName(),
+            email: profile.getEmail(),
+            img: profile.getImageUrl()
+          }
+        });
+        gapi.auth2.getAuthInstance().attachClickHandler("signin-button", {}, function (user) {
+          console.log(user);
+        }, function (error) {
+          console.log(error);
+        });
+        _this.isSignIn(gapi.auth2.getAuthInstance().isSignedIn.get());
       });
-      _this5.handleClick(Object.keys(_this5.menu)[0], _this5.menu[Object.keys(_this5.menu)[0]]["page"]);
     });
-    return _this5;
+
+    _this.isSignIn = function (state) {
+      if (state) {
+        _this.setState({
+          activePage: Object.keys(_this.menu)[0],
+          pageContent: _this.menu[Object.keys(_this.menu)[0]]["page"],
+          dialogShown: false
+        });
+        var profile = gapi.auth2.getAuthInstance().currentUser.get().getBasicProfile();
+        _this.setState({
+          userInfo: {
+            name: profile.getName(),
+            email: profile.getEmail(),
+            img: profile.getImageUrl()
+          }
+        });
+      } else {
+        //location.reload();
+      }
+    };
+
+    _this.handleClick = _this.handleClick.bind(_this);
+    _this.handleDialog.open = _this.handleDialog.open.bind(_this);
+    _this.handleDialog.close = _this.handleDialog.close.bind(_this);
+    return _this;
   }
 
   _createClass(Container, [{
+    key: "onSignIn",
+    value: function onSignIn(google) {
+      this.setState({
+        dialogShown: false
+      });
+      this.handleClick(Object.keys(this.menu)[0], this.menu[Object.keys(this.menu)[0]]["page"]);
+    }
+  }, {
     key: "handleClick",
     value: function handleClick(activeNum, page) {
       this.setState({
@@ -329,7 +306,8 @@ var Container = function (_React$Component3) {
           handleDialog: this.handleDialog,
           activePage: this.state.activePage,
           pageContent: this.state.pageContent,
-          menuList: this.state.menuList
+          menuList: this.state.menuList,
+          userInfo: this.state.userInfo
         })
       );
     }

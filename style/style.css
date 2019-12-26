@@ -164,3 +164,64 @@ body {
   background-color: #efefef;
   padding: 7px;
 }
+.hover {
+  transition: all 0.2s;
+  text-align: center;
+}
+.hover:hover {
+  cursor: pointer;
+  transition: all 0.3s;
+  font-size: 33px !important;
+  color: grey;
+}
+.studentResult {
+  background-color: #eee;
+  padding: 5px;
+  margin-top: 10px;
+}
+.resultControl {
+  animation: fadeinControl 0.5s;
+}
+@keyframes fadeinControl {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.resultTable th {
+  background-color: #bbb;
+  color: white;
+}
+.resultTable td {
+  border-bottom: 1px solid #ccc;
+}
+#xlsx_table {
+  width: 100% !important;
+  border-collapse: collapse;
+}
+#xlsx_table th,
+#xlsx_table td {
+  background-color: white;
+  padding: 5px;
+  white-space: nowrap;
+}
+#xlsx_table td {
+  border: 1px solid #aaa;
+}
+.Disabled {
+  opacity: 0.5 !important;
+}
+.Disabled:hover {
+  cursor: not-allowed;
+}
+.xlsx_table_container {
+  max-height: 350px;
+  max-width: 500px;
+  overflow-y: hidden;
+  overflow-x: auto;
+}
+.xlsx_locked {
+  background-color: #ddd !important;
+}

@@ -1,52 +1,32 @@
-const { ipcRenderer } = require("electron");
-const { google } = require("googleapis");
+import { QuestionPage } from "./questionComponent.js";
+import { StudentPage } from "./studentComponent.js";
+import { ResultPage } from "./resultComponent.js";
 
-// Component for each section of Kilogram Exam desktop
-const { QuestionPage } = require("./component/questionComponent.js");
-const { StudentPage } = require("./component/studentComponent.js");
-const { ResultPage } = require("./component/resultComponent.js");
-
-class Account extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      userImage: null,
-      displayName: null,
-      email: null
-    };
-    ipcRenderer.on("userInfo", (event, res) => {
-      this.setState({
-        userImage: res.data.photos[0].url,
-        displayName: res.data.names[0].displayName,
-        email: res.data.emailAddresses[0].value
-      });
-    });
-  }
-
-  render() {
-    return (
-      <span
-        onClick={() =>
-          this.props.handleDialog.open(
-            <LogoutDialog handleDialog={this.props.handleDialog} />
-          )
-        }
-        className="profileArea"
-        id="account"
-      >
-        <img
-          style={{ height: "20px", borderRadius: "50%" }}
-          align="center"
-          src={this.state.userImage}
-        />
-        <span id="account_detail"> {this.state.displayName}</span>
-      </span>
-    );
-  }
+function Account(props) {
+  return (
+    <span
+      onClick={() =>
+        props.handleDialog.open(
+          <LogoutDialog handleDialog={props.handleDialog} />
+        )
+      }
+      className="profileArea"
+      id="account"
+    >
+      <img
+        style={{ height: "20px", borderRadius: "50%" }}
+        align="center"
+        src={props.userInfo.img}
+      />
+      <span id="account_detail"> {props.userInfo.name}</span>
+    </span>
+  );
 }
 
-function Logout() {
-  ipcRenderer.send("logout");
+function Logout(dialog) {
+  dialog.open(<div>กำลังออกจากระบบ...</div>);
+  gapi.auth2.getAuthInstance().signOut();
+  location.reload();
 }
 
 function LogoutDialog(props) {
@@ -61,7 +41,7 @@ function LogoutDialog(props) {
         value="ยกเลิก"
       />
       <input
-        onClick={Logout}
+        onClick={() => Logout(props.handleDialog)}
         type="button"
         className="Button Danger"
         value="ยืนยัน"
@@ -73,7 +53,8 @@ function LogoutDialog(props) {
 function Header(props) {
   return (
     <div id="header">
-      {props.value} <Account handleDialog={props.handleDialog} />
+      {props.value}{" "}
+      <Account userInfo={props.userInfo} handleDialog={props.handleDialog} />
     </div>
   );
 }
@@ -111,7 +92,11 @@ function Sidebar(props) {
 function ContentContainer(props) {
   return (
     <div id="content_container">
-      <Header handleDialog={props.handleDialog} value={props.activePage} />
+      <Header
+        userInfo={props.userInfo}
+        handleDialog={props.handleDialog}
+        value={props.activePage}
+      />
       <div className="content">{props.pageContent}</div>
     </div>
   );
@@ -125,27 +110,8 @@ function Dialog(props) {
   );
 }
 
-class SignIn_Button extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      hovering: false
-    };
-  }
-
-  render() {
-    return (
-      <img
-        className="hover_pointer"
-        onMouseOver={() => this.setState({ hovering: true })}
-        onMouseOut={() => this.setState({ hovering: false })}
-        onClick={() => {
-          ipcRenderer.send(this.props.signinMethod);
-        }}
-        src={!this.state.hovering ? this.props.src : this.props.srcHover}
-      />
-    );
-  }
+function SignIn_Button() {
+  return <div id="signin-button" className="g-signin2"></div>;
 }
 
 class Container extends React.Component {
@@ -180,27 +146,86 @@ class Container extends React.Component {
       activePage: null,
       pageContent: null,
       dialogShown: true,
-      dialogContent: (
-        <SignIn_Button
-          src="google_signin_buttons/web/1x/btn_google_signin_light_normal_web.png"
-          srcHover="google_signin_buttons/web/1x/btn_google_signin_light_pressed_web.png"
-          signinMethod="googleSignin"
-        />
-      )
+      dialogContent: <SignIn_Button />,
+      userInfo: { name: "", email: "", img: "" }
     };
+
+    gapi.load("client:auth2", () => {
+      gapi.client
+        .init({
+          apiKey: "AIzaSyDN1w4HgvGe0ytbOUJ6T10i5ymjW9j0qE0",
+          clientId:
+            "613633799370-oq1j8j8te4nlb01hd2srbsqhg8vmnh8d.apps.googleusercontent.com",
+          scope:
+            "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/drive.appfolder https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile",
+          discoveryDocs: [
+            "https://www.googleapis.com/discovery/v1/apis/drive/v3/rest",
+            "https://people.googleapis.com/$discovery/rest?version=v1"
+          ]
+        })
+        .then(() => {
+          gapi.auth2.getAuthInstance().isSignedIn.listen(this.isSignIn);
+          let profile = gapi.auth2
+            .getAuthInstance()
+            .currentUser.get()
+            .getBasicProfile();
+          this.setState({
+            userInfo: {
+              name: profile.getName(),
+              email: profile.getEmail(),
+              img: profile.getImageUrl()
+            }
+          });
+          gapi.auth2.getAuthInstance().attachClickHandler(
+            "signin-button",
+            {},
+            user => {
+              console.log(user);
+            },
+            error => {
+              console.log(error);
+            }
+          );
+          this.isSignIn(gapi.auth2.getAuthInstance().isSignedIn.get());
+        });
+    });
+
+    this.isSignIn = state => {
+      if (state) {
+        this.setState({
+          activePage: Object.keys(this.menu)[0],
+          pageContent: this.menu[Object.keys(this.menu)[0]]["page"],
+          dialogShown: false
+        });
+        let profile = gapi.auth2
+          .getAuthInstance()
+          .currentUser.get()
+          .getBasicProfile();
+        this.setState({
+          userInfo: {
+            name: profile.getName(),
+            email: profile.getEmail(),
+            img: profile.getImageUrl()
+          }
+        });
+      } else {
+        //location.reload();
+      }
+    };
+
     this.handleClick = this.handleClick.bind(this);
     this.handleDialog.open = this.handleDialog.open.bind(this);
     this.handleDialog.close = this.handleDialog.close.bind(this);
+  }
 
-    ipcRenderer.on("signInSuccess", event => {
-      this.setState({
-        dialogShown: false
-      });
-      this.handleClick(
-        Object.keys(this.menu)[0],
-        this.menu[Object.keys(this.menu)[0]]["page"]
-      );
+  onSignIn(google) {
+    this.setState({
+      dialogShown: false
     });
+    this.handleClick(
+      Object.keys(this.menu)[0],
+      this.menu[Object.keys(this.menu)[0]]["page"]
+    );
   }
 
   handleClick(activeNum, page) {
@@ -226,6 +251,7 @@ class Container extends React.Component {
           activePage={this.state.activePage}
           pageContent={this.state.pageContent}
           menuList={this.state.menuList}
+          userInfo={this.state.userInfo}
         />
       </div>
     );

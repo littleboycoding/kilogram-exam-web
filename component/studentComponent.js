@@ -1,5 +1,7 @@
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -8,11 +10,9 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-var _require = require("../drive"),
-    driveGet = _require.driveGet,
-    driveUpdate = _require.driveUpdate;
+import { driveGet, driveUpdate } from "/drive.js";
 
-var StudentPage = function (_React$Component) {
+export var StudentPage = function (_React$Component) {
   _inherits(StudentPage, _React$Component);
 
   function StudentPage(props) {
@@ -89,8 +89,13 @@ var StudentPage = function (_React$Component) {
             null,
             React.createElement(
               "th",
-              { style: { width: "30%" } },
+              { style: { width: "15%" } },
               "รหัสประจำตัว"
+            ),
+            React.createElement(
+              "th",
+              { style: { width: "15%" } },
+              "ระดับชั้น"
             ),
             React.createElement(
               "th",
@@ -125,8 +130,13 @@ function StudentList(props) {
       ),
       React.createElement(
         "td",
+        null,
+        props.body[key].room
+      ),
+      React.createElement(
+        "td",
         { style: { position: "relative", height: "35px" } },
-        props.body[key],
+        props.body[key].name,
         React.createElement("input", {
           onClick: function onClick() {
             return props.handleDialog.open(React.createElement(StudentDelete, {
@@ -236,10 +246,11 @@ var CreateStudent = function (_React$Component3) {
 
     var _this7 = _possibleConstructorReturn(this, (CreateStudent.__proto__ || Object.getPrototypeOf(CreateStudent)).call(this, props));
 
-    _this7.state = { id: "", name: "", loading: false };
+    _this7.state = { id: "", name: "", room: "", loading: false };
     _this7.handleChange = _this7.handleChange.bind(_this7);
     _this7.handleSubmit = _this7.handleSubmit.bind(_this7);
     _this7.handleDelete = _this7.handleDelete.bind(_this7);
+    _this7.handleXLSX = _this7.handleXLSX.bind(_this7);
     _this7.data = Object.assign({}, _this7.props.body);
     return _this7;
   }
@@ -257,7 +268,10 @@ var CreateStudent = function (_React$Component3) {
       if (this.data[this.state.id] == undefined) {
         this.setState({ loading: true });
 
-        this.data[this.state.id] = this.state.name;
+        this.data[this.state.id] = {
+          name: this.state.name,
+          room: this.state.room
+        };
 
         console.log(this.data);
 
@@ -291,9 +305,32 @@ var CreateStudent = function (_React$Component3) {
       this.setState({ loading: true });
     }
   }, {
+    key: "handleXLSX",
+    value: function handleXLSX() {
+      var _this9 = this;
+
+      var file = document.getElementById("XLSX");
+      file.click();
+      file.onchange = function (e) {
+        var input = e.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: "array" });
+
+          _this9.props.handleDialog.open(React.createElement(TableXLSX, {
+            body: _this9.props.body,
+            workbook: workbook,
+            handleDialog: _this9.props.handleDialog
+          }));
+        };
+        reader.readAsArrayBuffer(input);
+      };
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this9 = this;
+      var _this10 = this;
 
       if (!this.state.loading) {
         return React.createElement(
@@ -302,14 +339,29 @@ var CreateStudent = function (_React$Component3) {
           React.createElement(
             "div",
             { style: { fontSize: 20, marginBottom: 15 } },
-            "\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19\u0E43\u0E2B\u0E21\u0E48"
+            "\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19\u0E43\u0E2B\u0E21\u0E48",
+            React.createElement("br", null),
+            React.createElement(
+              "button",
+              { onClick: this.handleXLSX, className: "Button Secondary" },
+              "\u0E2B\u0E23\u0E37\u0E2D\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E08\u0E32\u0E01\u0E44\u0E1F\u0E25\u0E4C XLSX"
+            ),
+            React.createElement("input", {
+              style: { display: "none" },
+              accept: ".xlsx",
+              type: "file",
+              required: true,
+              id: "XLSX"
+            })
           ),
           React.createElement(
             "form",
             { onSubmit: this.handleSubmit },
             React.createElement("input", {
               type: "text",
-              maxlength: "10",
+              maxLength: "10",
+              pattern: "^[0-9]*$",
+              title: "\u0E23\u0E2B\u0E31\u0E2A\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19\u0E15\u0E49\u0E2D\u0E07\u0E40\u0E1B\u0E47\u0E19\u0E40\u0E1E\u0E35\u0E22\u0E07\u0E15\u0E31\u0E27\u0E40\u0E25\u0E02\u0E40\u0E17\u0E48\u0E32\u0E19\u0E31\u0E49\u0E19",
               required: "true",
               placeholder: "\u0E23\u0E2B\u0E31\u0E2A\u0E1B\u0E23\u0E30\u0E08\u0E33\u0E15\u0E31\u0E27",
               style: {
@@ -319,9 +371,30 @@ var CreateStudent = function (_React$Component3) {
               },
               value: this.state.id,
               onChange: function onChange(e) {
-                return _this9.handleChange(e, "id");
+                return _this10.handleChange(e, "id");
               }
             }),
+            React.createElement("br", null),
+            React.createElement("input", {
+              required: "true",
+              type: "list",
+              list: "roomList",
+              placeholder: "\u0E01\u0E25\u0E38\u0E48\u0E21",
+              style: {
+                padding: "5px",
+                border: "1px solid #CCC",
+                marginBottom: "5px"
+              },
+              value: this.state.room,
+              onChange: function onChange(e) {
+                return _this10.handleChange(e, "room");
+              }
+            }),
+            React.createElement(
+              "datalist",
+              { id: "roomList" },
+              React.createElement(DistinctList, { body: this.props.body })
+            ),
             React.createElement("br", null),
             React.createElement("input", {
               required: "true",
@@ -329,18 +402,18 @@ var CreateStudent = function (_React$Component3) {
               placeholder: "\u0E0A\u0E37\u0E48\u0E2D-\u0E19\u0E32\u0E21\u0E2A\u0E01\u0E38\u0E25",
               style: {
                 padding: "5px",
-                border: "1px solid #CCC"
+                border: "1px solid #CCC",
+                marginBottom: "5px"
               },
               value: this.state.name,
               onChange: function onChange(e) {
-                return _this9.handleChange(e, "name");
+                return _this10.handleChange(e, "name");
               }
             }),
             React.createElement("br", null),
-            React.createElement("br", null),
             React.createElement("input", {
               onClick: function onClick() {
-                return _this9.props.handleDialog.close();
+                return _this10.props.handleDialog.close();
               },
               type: "button",
               value: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01",
@@ -363,4 +436,202 @@ var CreateStudent = function (_React$Component3) {
   return CreateStudent;
 }(React.Component);
 
-module.exports.StudentPage = StudentPage;
+var TableXLSX = function (_React$Component4) {
+  _inherits(TableXLSX, _React$Component4);
+
+  function TableXLSX(props) {
+    _classCallCheck(this, TableXLSX);
+
+    var _this11 = _possibleConstructorReturn(this, (TableXLSX.__proto__ || Object.getPrototypeOf(TableXLSX)).call(this, props));
+
+    _this11.column = ["รหัสประจำตัว", "ชื่อ-นามสกุล", "กลุ่ม"];
+    _this11.state = {
+      sheet: _this11.props.workbook.SheetNames[0],
+      column: [null, null, null]
+    };
+    _this11.handleSheetChange = _this11.handleSheetChange.bind(_this11);
+    _this11.handleClick = _this11.handleClick.bind(_this11);
+    _this11.handleSubmit = _this11.handleSubmit.bind(_this11);
+    return _this11;
+  }
+
+  _createClass(TableXLSX, [{
+    key: "handleSubmit",
+    value: function handleSubmit(event) {
+      var _this12 = this;
+
+      if (this.state.column.every(function (every) {
+        return every != null;
+      })) {
+        var sheet = this.props.workbook.Sheets[this.state.sheet];
+        var body = Object.assign({}, this.props.body);
+        var data = [];
+        this.state.column.forEach(function (column) {
+          data.push(Object.keys(sheet).filter(function (filter) {
+            return filter.replace(/[0-9]/g, "") == column;
+          }));
+        });
+        for (var i = 1; i < data[0].length; i++) {
+          if (sheet[data[0][i]].w.length <= 10 && sheet[data[0][i]].w.search(/[a-zA-Z]/g) == -1) {
+            Object.assign(body, _defineProperty({}, sheet[data[0][i]].w, {
+              name: sheet[data[1][i]].w,
+              room: sheet[data[2][i]].w
+            }));
+          }
+        }
+
+        console.log(body);
+        this.props.handleDialog.open(React.createElement(
+          "div",
+          { style: { fontSize: 20, marginBottom: 15 } },
+          "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \uFC70"
+        ));
+        driveUpdate("student.json", body).then(function (res) {
+          return _this12.props.handleDialog.close(React.createElement(StudentPage, { handleDialog: _this12.props.handleDialog }));
+        });
+      }
+      event.preventDefault();
+    }
+  }, {
+    key: "handleSheetChange",
+    value: function handleSheetChange(event) {
+      this.setState({
+        sheet: event.target.value,
+        column: [null, null, null]
+      });
+    }
+  }, {
+    key: "handleBackground",
+    value: function handleBackground(e, color, locked) {
+      if (e.target.id != "xlsx_table") {
+        var xlsx_table = document.getElementById("xlsx_table");
+        var xlsx_column = e.target.id.substring(11).replace(/[0-9]/g, "");
+        var tr = xlsx_table.children[0].children;
+        for (var i = 0; i < tr.length; i++) {
+          var td = tr[i].children;
+          for (var x = 0; x < td.length; x++) {
+            if (td[x].style.backgroundColor != "rgb(221, 221, 221)") {
+              if (td[x].id.substring(11).replace(/[0-9]/g, "") == xlsx_column) {
+                td[x].style.backgroundColor = color;
+              }
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: "handleClick",
+    value: function handleClick(event) {
+      if (event.target.id != "xlsx_table" && this.state.column.some(function (some) {
+        return some == null;
+      })) {
+        var xlsx_column = event.target.id.substring(11).replace(/[0-9]/g, "");
+        if (!this.state.column.some(function (some) {
+          return some == xlsx_column;
+        })) {
+          var column = this.state.column;
+          column[column.findIndex(function (find) {
+            return find == null;
+          })] = xlsx_column;
+          this.setState({
+            column: column
+          });
+          this.handleBackground(event, "#DDD", true);
+        }
+      }
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this13 = this;
+
+      return React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "select",
+          {
+            onChange: this.handleSheetChange,
+            className: "Input",
+            style: {
+              width: "100%",
+              backgroundColor: "white",
+              marginBottom: "10px"
+            }
+          },
+          this.props.workbook.SheetNames.map(function (map) {
+            return React.createElement(
+              "option",
+              null,
+              map
+            );
+          })
+        ),
+        React.createElement("div", {
+          onClick: this.handleClick,
+          onMouseOver: function onMouseOver() {
+            return _this13.handleBackground(event, "#CCC", false);
+          },
+          onMouseOut: function onMouseOut() {
+            return _this13.handleBackground(event, "#FFF", false);
+          },
+          className: "xlsx_table_container",
+          dangerouslySetInnerHTML: {
+            __html: XLSX.utils.sheet_to_html(this.props.workbook.Sheets[this.state.sheet], {
+              id: "xlsx_table"
+            })
+          }
+        }),
+        React.createElement("br", null),
+        this.state.column.some(function (some) {
+          return some == null;
+        }) ? React.createElement(
+          "span",
+          null,
+          "กรุณาเลือกคอลัมน์ - " + this.column[this.state.column.findIndex(function (find) {
+            return find == null;
+          })],
+          React.createElement("br", null),
+          React.createElement("br", null)
+        ) : "",
+        React.createElement(
+          "button",
+          {
+            onClick: function onClick() {
+              return _this13.props.handleDialog.close();
+            },
+            className: "Button"
+          },
+          "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01"
+        ),
+        React.createElement(
+          "button",
+          {
+            style: { marginLeft: "10px" },
+            onClick: this.handleSubmit,
+            className: (this.state.column.every(function (every) {
+              return every != null;
+            }) ? "" : "Disabled") + " Button Primary"
+          },
+          "\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01"
+        )
+      );
+    }
+  }]);
+
+  return TableXLSX;
+}(React.Component);
+
+function DistinctList(props) {
+  var body = Object.keys(props.body).map(function (map) {
+    return props.body[map].room;
+  });
+  var distinctBody = [].concat(_toConsumableArray(new Set(body)));
+  return distinctBody.map(function (map) {
+    return React.createElement(
+      "option",
+      { key: map },
+      map
+    );
+  });
+}

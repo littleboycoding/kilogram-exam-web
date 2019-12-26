@@ -1,20 +1,37 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>Kilogram Exam</title>
-		<meta http-equiv="Content-Security-Policy" content="script-src 'self' https://unpkg.com">
-		<meta charset="UTF-8">
-		<link rel="stylesheet" type="text/css" href="style/style.css">
-		<link rel="stylesheet" type="text/css" href="style/questionStyle.css">
-	</head>
-	<body>
-		<div id="root"></div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="google-signin-client_id"
+      content="613633799370-oq1j8j8te4nlb01hd2srbsqhg8vmnh8d.apps.googleusercontent.com"
+    />
+    <title>Kilogram Exam</title>
+    <link rel="icon" href="favicon.png" />
+    <script defer src="https://unpkg.com/xlsx@0.15.4/xlsx.mini.js"></script>
+    <script src="https://unpkg.com/jspdf@latest/dist/jspdf.min.js"></script>
+    <script
+      defer
+      src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"
+    ></script>
+    <script src="https://apis.google.com/js/platform.js"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <link rel="stylesheet" type="text/css" href="style/style.css" />
+    <link rel="stylesheet" type="text/css" href="style/questionStyle.css" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <!-- React, React-DOM CDN -->
+    <script
+      crossorigin=""
+      src="https://unpkg.com/react@16/umd/react.development.js"
+    ></script>
+    <script
+      crossorigin=""
+      src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"
+    ></script>
+    <!-- Main's Kilogram Exam component -->
 
-		<!-- React, React-DOM CDN -->
-		<script crossorigin src="https://unpkg.com/react@16/umd/react.development.js"></script>
-		<script crossorigin src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
-
-		<!-- Main's Kilogram Exam component -->
-		<script src="./component/main.js"></script>
-	</body>
+    <script type="module" src="./component/main.js"></script>
+  </body>
 </html>
