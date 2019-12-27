@@ -303,7 +303,7 @@ class Marking extends React.Component {
         <table
           style={{
             width: "130px",
-            float: "left",
+            display: "inline-block",
             fontSize: "13px"
           }}
           key={i}
@@ -314,14 +314,19 @@ class Marking extends React.Component {
             <td>ข</td>
             <td>ค</td>
             <td>ง</td>
-            <td>ฅ</td>
+            <td>จ</td>
           </tr>
           {totalAnswer}
         </table>
       );
     }
     return (
-      <div onClick={() => this.props.handleDialog.close()}>{answerSheet}</div>
+      <div
+        style={{ whiteSpace: "nowrap", overflowX: "auto", overflowY: "hidden" }}
+        onClick={() => this.props.handleDialog.close()}
+      >
+        {answerSheet}
+      </div>
     );
   }
 }

@@ -158,6 +158,7 @@ body {
 }
 .answerTable td {
   border: 1px solid #ccc;
+  min-width: calc(130px / 8);
 }
 .resultBorder {
   border-radius: 5px;

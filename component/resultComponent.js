@@ -441,7 +441,7 @@ var Marking = function (_React$Component3) {
           {
             style: {
               width: "130px",
-              float: "left",
+              display: "inline-block",
               fontSize: "13px"
             },
             key: i
@@ -473,7 +473,7 @@ var Marking = function (_React$Component3) {
             React.createElement(
               "td",
               null,
-              "\u0E05"
+              "\u0E08"
             )
           ),
           totalAnswer
@@ -481,9 +481,12 @@ var Marking = function (_React$Component3) {
       }
       return React.createElement(
         "div",
-        { onClick: function onClick() {
+        {
+          style: { whiteSpace: "nowrap", overflowX: "auto", overflowY: "hidden" },
+          onClick: function onClick() {
             return _this7.props.handleDialog.close();
-          } },
+          }
+        },
         answerSheet
       );
     }

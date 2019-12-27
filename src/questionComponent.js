@@ -1,5 +1,5 @@
 import { driveGet, driveUpdate } from "../drive.js";
-var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
+var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "จ" };
 
 class CreateNewQuestion extends React.Component {
   constructor(props) {
@@ -459,9 +459,19 @@ class QuestionEditPage extends React.Component {
                   style={{ display: "none" }}
                 />
                 <div
-                  onClick={() =>
-                    document.getElementById("questionImg" + question_no).click()
-                  }
+                  onClick={() => {
+                    if (question["question_img"] == "") {
+                      document
+                        .getElementById("questionImg" + question_no)
+                        .click();
+                    } else {
+                      let thisQuestion = Object.assign({}, this.state.data);
+                      thisQuestion[question_no]["question_img"] = "";
+                      this.setState({
+                        data: thisQuestion
+                      });
+                    }
+                  }}
                   className="Button AddImage"
                   style={{ right: "60px" }}
                 >
@@ -493,6 +503,8 @@ class QuestionEditPage extends React.Component {
                 handleTab={this.handleTab}
                 handleChange={this.handleAnswerChange}
                 addFile={this.addFile}
+                data={this.state.data}
+                removeImg={this.setState.bind(this)}
               />
             </div>
           );
@@ -533,11 +545,19 @@ function EditAnswer(props) {
             placeholder={"คำตอบข้อ " + props.question_no}
           />
           <div
-            onClick={() =>
-              document
-                .getElementById("file" + props.question_no + choice)
-                .click()
-            }
+            onClick={() => {
+              if (props.data[props.question_no]["choice_img"][choice] == "") {
+                document
+                  .getElementById("file" + props.question_no + choice)
+                  .click();
+              } else {
+                let thisQuestion = Object.assign({}, props.data);
+                thisQuestion[props.question_no]["choice_img"][choice] = "";
+                props.removeImg({
+                  data: thisQuestion
+                });
+              }
+            }}
             className="Button AddImage"
           >
             <img
@@ -610,7 +630,7 @@ function questionPrint(data) {
     //return data[map]["title"] + data[map]["answer"];
     return (
       (data[map]["question_img"]
-        ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" +
+        ? "<img style='margin-top: 15px; width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" +
           data[map]["question_img"] +
           "' />"
         : "") +

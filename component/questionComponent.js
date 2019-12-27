@@ -9,7 +9,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { driveGet, driveUpdate } from "../drive.js";
-var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "ฅ" };
+var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "จ" };
 
 var CreateNewQuestion = function (_React$Component) {
   _inherits(CreateNewQuestion, _React$Component);
@@ -601,7 +601,15 @@ var QuestionEditPage = function (_React$Component4) {
                 "div",
                 {
                   onClick: function onClick() {
-                    return document.getElementById("questionImg" + question_no).click();
+                    if (question["question_img"] == "") {
+                      document.getElementById("questionImg" + question_no).click();
+                    } else {
+                      var thisQuestion = Object.assign({}, _this13.state.data);
+                      thisQuestion[question_no]["question_img"] = "";
+                      _this13.setState({
+                        data: thisQuestion
+                      });
+                    }
                   },
                   className: "Button AddImage",
                   style: { right: "60px" }
@@ -645,7 +653,9 @@ var QuestionEditPage = function (_React$Component4) {
               question_no: question_no,
               handleTab: _this13.handleTab,
               handleChange: _this13.handleAnswerChange,
-              addFile: _this13.addFile
+              addFile: _this13.addFile,
+              data: _this13.state.data,
+              removeImg: _this13.setState.bind(_this13)
             })
           );
         }),
@@ -705,7 +715,15 @@ function EditAnswer(props) {
           "div",
           {
             onClick: function onClick() {
-              return document.getElementById("file" + props.question_no + choice).click();
+              if (props.data[props.question_no]["choice_img"][choice] == "") {
+                document.getElementById("file" + props.question_no + choice).click();
+              } else {
+                var thisQuestion = Object.assign({}, props.data);
+                thisQuestion[props.question_no]["choice_img"][choice] = "";
+                props.removeImg({
+                  data: thisQuestion
+                });
+              }
             },
             className: "Button AddImage"
           },
@@ -792,7 +810,7 @@ function questionPrint(data) {
   var dataListed = Object.keys(data);
   var htmlResult = dataListed.map(function (map) {
     //return data[map]["title"] + data[map]["answer"];
-    return (data[map]["question_img"] ? "<img style='width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" + data[map]["question_img"] + "' />" : "") + "<p>" + map + ". " + data[map]["title"] + "</p>" + Object.keys(data[map]["answer"]).map(function (maps) {
+    return (data[map]["question_img"] ? "<img style='margin-top: 15px; width: 100%; max-height: 230px; background-color: #FAFAFA; object-fit: contain;' src='" + data[map]["question_img"] + "' />" : "") + "<p>" + map + ". " + data[map]["title"] + "</p>" + Object.keys(data[map]["answer"]).map(function (maps) {
       return data[map]["answer"][maps] ? "<div style='margin-bottom: 10px; width: 50%; float: left;'>" + markName[maps] + ". " + data[map]["answer"][maps] + "" + (data[map]["choice_img"][maps] ? "<br /><img src='" + data[map]["choice_img"][maps] + "' style='max-height: 100px;' /></div>" : "</div>") : "";
     }).join("") + "<br style='clear: both;' />";
   });
