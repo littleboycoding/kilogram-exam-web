@@ -32,11 +32,10 @@ export class SettingPage extends React.Component {
     reader.readAsDataURL(file);
   }
 
-  handlePrint() {
-    let print = window.open(
-      "sheet.html?title=" + this.state.title + "&image=" + this.state.image,
-      ""
-    );
+  handlePrint(sheet) {
+    sessionStorage.title = this.state.title;
+    sessionStorage.image = this.state.image;
+    let print = window.open(sheet, "");
     /*
     setTimeout(() => {
       print.document.getElementById("title").innerHTML = this.state.title;
@@ -98,24 +97,14 @@ export class SettingPage extends React.Component {
                 <h3>เลือกจำนวนข้อ</h3>
                 <button
                   style={{ width: "100px" }}
-                  onClick={() =>
-                    window.open(
-                      "sheet.html?title=" +
-                        this.state.title +
-                        "&image=" +
-                        this.state.image,
-                      ""
-                    )
-                  }
+                  onClick={() => this.handlePrint("sheet.html")}
                   className="Button Primary"
                 >
                   100 ข้อ
                 </button>{" "}
                 <button
                   style={{ width: "100px" }}
-                  onClick={() =>
-                    window.open("../sheet2.html?title=" + this.state.title, "")
-                  }
+                  onClick={() => this.handlePrint("sheet2.html")}
                   className="Button Primary"
                 >
                   50 ข้อ

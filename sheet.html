@@ -2309,6 +2309,7 @@
     </div>
     <script>
       window.onload = () => {
+        /*
         let param = document.URL.substring(
           document.URL.indexOf("?") + 1,
           document.URL.length
@@ -2321,11 +2322,14 @@
         }, {});
 
         console.log(resultParam);
+*/
         let title = document.getElementById("title");
 
         title.innerHTML = `<img src="${
-          resultParam.image ? resultParam.image : "favicon.png"
-        }" /> ${resultParam.title ? resultParam.title : "Kilogram Exam Sheet"}`;
+          sessionStorage.image ? sessionStorage.image : "favicon.png"
+        }" /> ${
+          sessionStorage.title ? sessionStorage.title : "Kilogram Exam Sheet"
+        }`;
 
         print();
       };

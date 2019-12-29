@@ -2676,6 +2676,7 @@
     </div>
     <script>
       window.onload = () => {
+        /*
         let param = document.URL.substring(
           document.URL.indexOf("?") + 1,
           document.URL.length
@@ -2688,15 +2689,16 @@
         }, {});
 
         console.log(resultParam);
+              */
         let title = document.getElementById("title");
         let title2 = document.getElementById("title2");
 
         title.innerHTML = `${
-          resultParam.title ? resultParam.title : "Kilogram Exam Sheet"
+          sessionStorage.title ? sessionStorage.title : "Kilogram Exam Sheet"
         }`;
 
         title2.innerHTML = `${
-          resultParam.title ? resultParam.title : "Kilogram Exam Sheet"
+          sessionStorage.title ? sessionStorage.title : "Kilogram Exam Sheet"
         }`;
 
         print();

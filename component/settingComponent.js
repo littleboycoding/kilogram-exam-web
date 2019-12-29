@@ -52,8 +52,10 @@ export var SettingPage = function (_React$Component) {
     }
   }, {
     key: "handlePrint",
-    value: function handlePrint() {
-      var print = window.open("sheet.html?title=" + this.state.title + "&image=" + this.state.image, "");
+    value: function handlePrint(sheet) {
+      sessionStorage.title = this.state.title;
+      sessionStorage.image = this.state.image;
+      var print = window.open(sheet, "");
       /*
       setTimeout(() => {
         print.document.getElementById("title").innerHTML = this.state.title;
@@ -141,7 +143,7 @@ export var SettingPage = function (_React$Component) {
                 {
                   style: { width: "100px" },
                   onClick: function onClick() {
-                    return window.open("sheet.html?title=" + _this3.state.title + "&image=" + _this3.state.image, "");
+                    return _this3.handlePrint("sheet.html");
                   },
                   className: "Button Primary"
                 },
@@ -153,7 +155,7 @@ export var SettingPage = function (_React$Component) {
                 {
                   style: { width: "100px" },
                   onClick: function onClick() {
-                    return window.open("../sheet2.html?title=" + _this3.state.title, "");
+                    return _this3.handlePrint("sheet2.html");
                   },
                   className: "Button Primary"
                 },
