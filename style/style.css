@@ -34,7 +34,7 @@ body {
   border-radius: 5px;
 }
 #sidebar {
-  width: 150px;
+  width: 180px;
   background-color: #809ee8;
   min-height: 100%;
   float: left;
@@ -49,7 +49,7 @@ body {
   cursor: pointer;
 }
 #content_container {
-  width: calc(100% - 150px);
+  width: calc(100% - 180px);
   background-color: #eee;
   height: 100%;
   max-height: 100%;
@@ -225,4 +225,14 @@ body {
 }
 .xlsx_locked {
   background-color: #ddd !important;
+}
+.imgLogo {
+  width: 50px;
+  height: 50px;
+  background-color: white;
+  vertical-align: middle;
+}
+.imgLogo:hover {
+  cursor: pointer;
+  opacity: 0.6;
 }

@@ -1,6 +1,7 @@
 import { QuestionPage } from "./questionComponent.js";
 import { StudentPage } from "./studentComponent.js";
 import { ResultPage } from "./resultComponent.js";
+import { SettingPage } from "./settingComponent.js";
 
 function Account(props) {
   return (
@@ -134,11 +135,14 @@ class Container extends React.Component {
     };
 
     this.menu = {
-      "ﴕ ข้อสอบ": {
+      " ข้อสอบ": {
         page: <QuestionPage handleDialog={this.handleDialog} />
       },
-      " นักเรียน": { page: <StudentPage handleDialog={this.handleDialog} /> },
-      " สรุป": { page: <ResultPage handleDialog={this.handleDialog} /> }
+      " นักเรียน": { page: <StudentPage handleDialog={this.handleDialog} /> },
+      " สรุป": { page: <ResultPage handleDialog={this.handleDialog} /> },
+      "煉 กระดาษคำตอบ": {
+        page: <SettingPage handleDialog={this.handleDialog} />
+      }
     };
 
     this.state = {

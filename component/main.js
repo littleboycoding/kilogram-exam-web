@@ -9,6 +9,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 import { QuestionPage } from "./questionComponent.js";
 import { StudentPage } from "./studentComponent.js";
 import { ResultPage } from "./resultComponent.js";
+import { SettingPage } from "./settingComponent.js";
 
 function Account(props) {
   return React.createElement(
@@ -203,11 +204,14 @@ var Container = function (_React$Component) {
     };
 
     _this.menu = {
-      "ﴕ ข้อสอบ": {
+      " ข้อสอบ": {
         page: React.createElement(QuestionPage, { handleDialog: _this.handleDialog })
       },
-      " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this.handleDialog }) },
-      " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this.handleDialog }) }
+      " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this.handleDialog }) },
+      " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this.handleDialog }) },
+      "煉 กระดาษคำตอบ": {
+        page: React.createElement(SettingPage, { handleDialog: _this.handleDialog })
+      }
     };
 
     _this.state = {
