@@ -53,7 +53,7 @@ export var SettingPage = function (_React$Component) {
   }, {
     key: "handlePrint",
     value: function handlePrint() {
-      var print = window.open("../sheet.html?title=" + this.state.title + "&image=" + this.state.image, "");
+      var print = window.open("sheet.html?title=" + this.state.title + "&image=" + this.state.image, "");
       /*
       setTimeout(() => {
         print.document.getElementById("title").innerHTML = this.state.title;
@@ -141,7 +141,7 @@ export var SettingPage = function (_React$Component) {
                 {
                   style: { width: "100px" },
                   onClick: function onClick() {
-                    return window.open("../sheet.html?title=" + _this3.state.title + "&image=" + _this3.state.image, "");
+                    return window.open("sheet.html?title=" + _this3.state.title + "&image=" + _this3.state.image, "");
                   },
                   className: "Button Primary"
                 },

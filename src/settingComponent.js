@@ -34,7 +34,7 @@ export class SettingPage extends React.Component {
 
   handlePrint() {
     let print = window.open(
-      "../sheet.html?title=" + this.state.title + "&image=" + this.state.image,
+      "sheet.html?title=" + this.state.title + "&image=" + this.state.image,
       ""
     );
     /*
@@ -100,7 +100,7 @@ export class SettingPage extends React.Component {
                   style={{ width: "100px" }}
                   onClick={() =>
                     window.open(
-                      "../sheet.html?title=" +
+                      "sheet.html?title=" +
                         this.state.title +
                         "&image=" +
                         this.state.image,
