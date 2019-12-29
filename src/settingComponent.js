@@ -47,7 +47,7 @@ export class SettingPage extends React.Component {
   render() {
     return (
       <div>
-        <h3>ตั้งค่ากระดาษคำตอบ</h3>
+        <h3>漣 ตั้งค่ากระดาษคำตอบ</h3>
         {"ชื่อหัวกระดาษ"}
         <br />
         <input
@@ -100,14 +100,14 @@ export class SettingPage extends React.Component {
                   onClick={() => this.handlePrint("sheet.html")}
                   className="Button Primary"
                 >
-                  100 ข้อ
+                   100 ข้อ
                 </button>{" "}
                 <button
                   style={{ width: "100px" }}
                   onClick={() => this.handlePrint("sheet2.html")}
                   className="Button Primary"
                 >
-                  50 ข้อ
+                   50 ข้อ
                 </button>
                 <br />
                 <br />
@@ -122,7 +122,7 @@ export class SettingPage extends React.Component {
           }
           className="Button Primary"
           type="submit"
-          value="พิมพ์กระดาษ"
+          value=" พิมพ์กระดาษ"
           style={{ padding: 10 }}
         />
       </div>

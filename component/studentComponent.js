@@ -68,7 +68,7 @@ export var StudentPage = function (_React$Component) {
         "div",
         null,
         React.createElement(
-          "button",
+          "div",
           {
             onClick: function onClick() {
               _this3.props.handleDialog.open(React.createElement(CreateStudent, {
@@ -76,10 +76,10 @@ export var StudentPage = function (_React$Component) {
                 body: _this3.state.body
               }));
             },
-            style: { marginBottom: "10px" },
-            className: "Primary Button"
+            style: { marginBottom: "10px", display: "inline-block" },
+            className: "Button Primary"
           },
-          "เพิ่มนักเรียนใหม่"
+          "\uF50F \u0E40\u0E1E\u0E34\u0E48\u0E21\u0E19\u0E31\u0E01\u0E40\u0E23\u0E35\u0E22\u0E19\u0E43\u0E2B\u0E21\u0E48"
         ),
         React.createElement(
           "table",

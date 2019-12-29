@@ -209,7 +209,7 @@ var Container = function (_React$Component) {
       },
       " นักเรียน": { page: React.createElement(StudentPage, { handleDialog: _this.handleDialog }) },
       " สรุป": { page: React.createElement(ResultPage, { handleDialog: _this.handleDialog }) },
-      "煉 กระดาษคำตอบ": {
+      " กระดาษคำตอบ": {
         page: React.createElement(SettingPage, { handleDialog: _this.handleDialog })
       }
     };

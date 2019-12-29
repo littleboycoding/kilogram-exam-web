@@ -143,7 +143,7 @@ class ResultCard extends React.Component {
             fontWeight: "bold"
           }}
         >
-          {this.props.title}
+          﫳 {this.props.title}
         </div>{" "}
         <div style={{ position: "relative", padding: "10px" }}>
           <span className="resultBorder">
@@ -205,7 +205,7 @@ class ResultCard extends React.Component {
                 style={{ float: "right" }}
                 className="Button Secondary"
               >
-                {"พิมพ์รายงาน"}
+                {" พิมพ์รายงาน"}
               </button>
               <br style={{ clear: "both" }} />
               <table

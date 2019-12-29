@@ -175,6 +175,7 @@ var ResultCard = function (_React$Component2) {
               fontWeight: "bold"
             }
           },
+          "\uFAF3 ",
           this.props.title
         ),
         " ",
@@ -278,7 +279,7 @@ var ResultCard = function (_React$Component2) {
                 style: { float: "right" },
                 className: "Button Secondary"
               },
-              "พิมพ์รายงาน"
+              " พิมพ์รายงาน"
             ),
             React.createElement("br", { style: { clear: "both" } }),
             React.createElement(

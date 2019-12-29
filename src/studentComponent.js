@@ -36,7 +36,7 @@ export class StudentPage extends React.Component {
   render() {
     return (
       <div>
-        <button
+        <div
           onClick={() => {
             this.props.handleDialog.open(
               <CreateStudent
@@ -45,11 +45,11 @@ export class StudentPage extends React.Component {
               />
             );
           }}
-          style={{ marginBottom: "10px" }}
-          className="Primary Button"
+          style={{ marginBottom: "10px", display: "inline-block" }}
+          className="Button Primary"
         >
-          {"เพิ่มนักเรียนใหม่"}
-        </button>
+           เพิ่มนักเรียนใหม่
+        </div>
         <table className="studentList">
           <tr>
             <th style={{ width: "15%" }}>{"รหัสประจำตัว"}</th>

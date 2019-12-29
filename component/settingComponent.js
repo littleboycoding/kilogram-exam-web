@@ -74,7 +74,7 @@ export var SettingPage = function (_React$Component) {
         React.createElement(
           "h3",
           null,
-          "\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E01\u0E23\u0E30\u0E14\u0E32\u0E29\u0E04\u0E33\u0E15\u0E2D\u0E1A"
+          "\uF992 \u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32\u0E01\u0E23\u0E30\u0E14\u0E32\u0E29\u0E04\u0E33\u0E15\u0E2D\u0E1A"
         ),
         "ชื่อหัวกระดาษ",
         React.createElement("br", null),
@@ -147,7 +147,7 @@ export var SettingPage = function (_React$Component) {
                   },
                   className: "Button Primary"
                 },
-                "100 \u0E02\u0E49\u0E2D"
+                "\uF249 100 \u0E02\u0E49\u0E2D"
               ),
               " ",
               React.createElement(
@@ -159,7 +159,7 @@ export var SettingPage = function (_React$Component) {
                   },
                   className: "Button Primary"
                 },
-                "50 \u0E02\u0E49\u0E2D"
+                "\uF249 50 \u0E02\u0E49\u0E2D"
               ),
               React.createElement("br", null),
               React.createElement("br", null),
@@ -175,7 +175,7 @@ export var SettingPage = function (_React$Component) {
           },
           className: "Button Primary",
           type: "submit",
-          value: "\u0E1E\u0E34\u0E21\u0E1E\u0E4C\u0E01\u0E23\u0E30\u0E14\u0E32\u0E29",
+          value: "\uF02F \u0E1E\u0E34\u0E21\u0E1E\u0E4C\u0E01\u0E23\u0E30\u0E14\u0E32\u0E29",
           style: { padding: 10 }
         })
       );

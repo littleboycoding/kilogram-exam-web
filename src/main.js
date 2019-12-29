@@ -140,7 +140,7 @@ class Container extends React.Component {
       },
       " นักเรียน": { page: <StudentPage handleDialog={this.handleDialog} /> },
       " สรุป": { page: <ResultPage handleDialog={this.handleDialog} /> },
-      "煉 กระดาษคำตอบ": {
+      " กระดาษคำตอบ": {
         page: <SettingPage handleDialog={this.handleDialog} />
       }
     };
