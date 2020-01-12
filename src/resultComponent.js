@@ -24,18 +24,29 @@ export class ResultPage extends React.Component {
 
   render() {
     let resultList = [];
+    let sortBody = {};
     for (const key in this.state.body) {
       let sum = 0;
       for (const keys in this.state.body[key]) {
         sum = sum + this.state.body[key][keys].totalScore;
       }
-      let avg = sum / Object.keys(this.state.body[key]).length;
+      sortBody = { [key]: Object.keys(this.state.body[key]) };
+      sortBody[key] = sortBody[key].sort(
+        (a, b) =>
+          this.state.body[key][b].totalScore -
+          this.state.body[key][a].totalScore
+      );
+      let avg =
+        Math.round((sum / Object.keys(this.state.body[key]).length) * 100) /
+        100;
       let total = Object.keys(this.state.body[key]).length;
       let sortedScore = [];
       for (const sortHold in this.state.body[key]) {
         sortedScore.push(this.state.body[key][sortHold].totalScore);
       }
       sortedScore.sort((a, b) => a - b);
+
+      console.log(this.state.body, sortBody);
 
       resultList.push(
         <ResultCard

@@ -2,6 +2,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -47,21 +49,31 @@ export var ResultPage = function (_React$Component) {
   }, {
     key: "render",
     value: function render() {
+      var _this3 = this;
+
       var resultList = [];
-      for (var key in this.state.body) {
+      var sortBody = {};
+
+      var _loop = function _loop(key) {
         var sum = 0;
-        for (var keys in this.state.body[key]) {
-          sum = sum + this.state.body[key][keys].totalScore;
+        for (var keys in _this3.state.body[key]) {
+          sum = sum + _this3.state.body[key][keys].totalScore;
         }
-        var avg = sum / Object.keys(this.state.body[key]).length;
-        var total = Object.keys(this.state.body[key]).length;
+        sortBody = _defineProperty({}, key, Object.keys(_this3.state.body[key]));
+        sortBody[key] = sortBody[key].sort(function (a, b) {
+          return _this3.state.body[key][b].totalScore - _this3.state.body[key][a].totalScore;
+        });
+        var avg = Math.round(sum / Object.keys(_this3.state.body[key]).length * 100) / 100;
+        var total = Object.keys(_this3.state.body[key]).length;
         var sortedScore = [];
-        for (var sortHold in this.state.body[key]) {
-          sortedScore.push(this.state.body[key][sortHold].totalScore);
+        for (var sortHold in _this3.state.body[key]) {
+          sortedScore.push(_this3.state.body[key][sortHold].totalScore);
         }
         sortedScore.sort(function (a, b) {
           return a - b;
         });
+
+        console.log(_this3.state.body, sortBody);
 
         resultList.push(React.createElement(ResultCard, {
           avg: avg,
@@ -71,9 +83,13 @@ export var ResultPage = function (_React$Component) {
           min: sortedScore[0],
           key: key,
           title: key,
-          body: this.state.body,
-          handleDialog: this.props.handleDialog
+          body: _this3.state.body,
+          handleDialog: _this3.props.handleDialog
         }));
+      };
+
+      for (var key in this.state.body) {
+        _loop(key);
       }
       return React.createElement(
         "div",
@@ -92,18 +108,18 @@ var ResultCard = function (_React$Component2) {
   function ResultCard(props) {
     _classCallCheck(this, ResultCard);
 
-    var _this3 = _possibleConstructorReturn(this, (ResultCard.__proto__ || Object.getPrototypeOf(ResultCard)).call(this, props));
+    var _this4 = _possibleConstructorReturn(this, (ResultCard.__proto__ || Object.getPrototypeOf(ResultCard)).call(this, props));
 
-    _this3.state = {
+    _this4.state = {
       shown: false,
-      body: _this3.props.body[_this3.props.title],
+      body: _this4.props.body[_this4.props.title],
       room: ""
     };
 
-    _this3.handleClick = _this3.handleClick.bind(_this3);
-    _this3.handleChange = _this3.handleChange.bind(_this3);
-    _this3.handlePrint = _this3.handlePrint.bind(_this3);
-    return _this3;
+    _this4.handleClick = _this4.handleClick.bind(_this4);
+    _this4.handleChange = _this4.handleChange.bind(_this4);
+    _this4.handlePrint = _this4.handlePrint.bind(_this4);
+    return _this4;
   }
 
   _createClass(ResultCard, [{
@@ -123,7 +139,7 @@ var ResultCard = function (_React$Component2) {
   }, {
     key: "handlePrint",
     value: function handlePrint() {
-      var _this4 = this;
+      var _this5 = this;
 
       this.props.handleDialog.open(React.createElement(
         "h3",
@@ -133,9 +149,9 @@ var ResultCard = function (_React$Component2) {
       var doc = new jsPDF();
       var win = window.open("");
       var resultStudent = Object.keys(this.state.body).filter(function (filter) {
-        return _this4.state.room == "" ? true : _this4.state.body[filter].room == _this4.state.room;
+        return _this5.state.room == "" ? true : _this5.state.body[filter].room == _this5.state.room;
       }).reduce(function (total, value) {
-        return total + "<tr><td>" + value + "</td><td>" + _this4.state.body[value].room + "</td><td style=\"text-align: right;\">" + _this4.state.body[value].totalScore + "</td></tr>";
+        return total + "<tr><td>" + value + "</td><td>" + _this5.state.body[value].room + "</td><td style=\"text-align: right;\">" + _this5.state.body[value].totalScore + "</td></tr>";
       }, "<tr><th>ชื่อ-นามสกุล</th><th>กลุ่ม</th><th>คะแนนที่ได้</th></tr>");
       var resultOutput = "\n    <title>\u0E23\u0E32\u0E22\u0E07\u0E32\u0E19\u0E1C\u0E25\u0E01\u0E32\u0E23\u0E2A\u0E2D\u0E1A - " + this.props.title + "</title>\n    <meta charset=\"UTF-8\"/>\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"style/resultStyle.css\" />\n    <body style=\"margin: 0px; overflow: hidden;\">\n\t<div id=\"pdf_capture\" style=\"margin: 40px\">\n\t\t<h2>\u0E2A\u0E23\u0E38\u0E1B\u0E1C\u0E25\u0E01\u0E32\u0E23\u0E2A\u0E2D\u0E1A - " + this.props.title + "</h2>\n\t\t<div style=\"display: inline-block;\">\n\t\t<p>\u0E08\u0E33\u0E19\u0E27\u0E19\u0E1C\u0E39\u0E49\u0E40\u0E02\u0E49\u0E32\u0E2A\u0E2D\u0E1A " + this.props.total + " | \u0E04\u0E30\u0E41\u0E19\u0E19\u0E2A\u0E39\u0E07\u0E2A\u0E38\u0E14 " + this.props.max + " | \u0E04\u0E30\u0E41\u0E19\u0E19\u0E15\u0E48\u0E33\u0E2A\u0E38\u0E14 " + this.props.min + " | \u0E40\u0E09\u0E25\u0E35\u0E48\u0E22 " + this.props.avg + " \u0E04\u0E30\u0E41\u0E19\u0E19</p>\n\t\t</div><br/>\n\t\t<table class=\"resultStudent\">\n\t\t\t" + resultStudent + "\n\t\t</table>\n\t</div>\n\t<iframe id=\"pdf\" frameborder=\"none\" width=\"100%\" height=\"100%\"></iframe>\n    </body>";
 
@@ -148,13 +164,13 @@ var ResultCard = function (_React$Component2) {
           filename: "report.pdf"
         });
         doc.getElementById("pdf_capture").style.display = "none";
-        _this4.props.handleDialog.close();
+        _this5.props.handleDialog.close();
       });
     }
   }, {
     key: "render",
     value: function render() {
-      var _this5 = this;
+      var _this6 = this;
 
       return React.createElement(
         "div",
@@ -215,9 +231,9 @@ var ResultCard = function (_React$Component2) {
             "button",
             {
               onClick: function onClick() {
-                return _this5.props.handleDialog.open(React.createElement(Marking, {
-                  body: _this5.props.body[_this5.props.title],
-                  handleDialog: _this5.props.handleDialog
+                return _this6.props.handleDialog.open(React.createElement(Marking, {
+                  body: _this6.props.body[_this6.props.title],
+                  handleDialog: _this6.props.handleDialog
                 }));
               },
               className: "Button Primary"
@@ -315,9 +331,9 @@ var ResultCard = function (_React$Component2) {
                 "tbody",
                 null,
                 Object.keys(this.state.body).filter(function (filter) {
-                  return _this5.state.room == "" ? true : _this5.state.body[filter].room == _this5.state.room;
+                  return _this6.state.room == "" ? true : _this6.state.body[filter].room == _this6.state.room;
                 }).sort(function (a, b) {
-                  return _this5.state.body[a].totalScore - _this5.state.body[b].totalScore;
+                  return _this6.state.body[a].totalScore - _this6.state.body[b].totalScore;
                 }).map(function (map) {
                   return React.createElement(
                     "tr",
@@ -330,12 +346,12 @@ var ResultCard = function (_React$Component2) {
                     React.createElement(
                       "td",
                       null,
-                      _this5.state.body[map].room
+                      _this6.state.body[map].room
                     ),
                     React.createElement(
                       "td",
                       { style: { textAlign: "right" } },
-                      _this5.state.body[map].totalScore
+                      _this6.state.body[map].totalScore
                     )
                   );
                 })
@@ -376,7 +392,7 @@ var Marking = function (_React$Component3) {
   _createClass(Marking, [{
     key: "render",
     value: function render() {
-      var _this7 = this;
+      var _this8 = this;
 
       var answerSheet = [];
       var markingResult = [];
@@ -485,7 +501,7 @@ var Marking = function (_React$Component3) {
         {
           style: { whiteSpace: "nowrap", overflowX: "auto", overflowY: "hidden" },
           onClick: function onClick() {
-            return _this7.props.handleDialog.close();
+            return _this8.props.handleDialog.close();
           }
         },
         answerSheet
