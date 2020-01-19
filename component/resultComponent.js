@@ -11,6 +11,7 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 import { driveGet, driveUpdate } from "../drive.js";
+var choiceName = ["", "A", "B", "C", "D", "E"];
 
 export var ResultPage = function (_React$Component) {
   _inherits(ResultPage, _React$Component);
@@ -21,7 +22,8 @@ export var ResultPage = function (_React$Component) {
     var _this = _possibleConstructorReturn(this, (ResultPage.__proto__ || Object.getPrototypeOf(ResultPage)).call(this, props));
 
     _this.state = {
-      body: {}
+      body: {},
+      question: {}
     };
     return _this;
   }
@@ -37,8 +39,17 @@ export var ResultPage = function (_React$Component) {
         "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E42\u0E2B\u0E25\u0E14 \uFC70"
       ));
       driveGet("result.json").then(function (res) {
-        _this2.setState({ body: res });
-        _this2.props.handleDialog.close();
+        driveGet("question.json").then(function (ques) {
+          _this2.setState({
+            body: res,
+            question: Object.keys(ques).reduce(function (total, map) {
+              return Object.assign(total, _defineProperty({}, map, Object.keys(ques[map]).map(function (no) {
+                return ques[map][no]["correct"];
+              })));
+            }, {})
+          });
+          _this2.props.handleDialog.close();
+        });
       });
     }
   }, {
@@ -73,8 +84,6 @@ export var ResultPage = function (_React$Component) {
           return a - b;
         });
 
-        console.log(_this3.state.body, sortBody);
-
         resultList.push(React.createElement(ResultCard, {
           avg: avg,
           total: total,
@@ -84,6 +93,7 @@ export var ResultPage = function (_React$Component) {
           key: key,
           title: key,
           body: _this3.state.body,
+          question: _this3.state.question,
           handleDialog: _this3.props.handleDialog
         }));
       };
@@ -113,6 +123,7 @@ var ResultCard = function (_React$Component2) {
     _this4.state = {
       shown: false,
       body: _this4.props.body[_this4.props.title],
+      question: {},
       room: ""
     };
 
@@ -233,7 +244,9 @@ var ResultCard = function (_React$Component2) {
               onClick: function onClick() {
                 return _this6.props.handleDialog.open(React.createElement(Marking, {
                   body: _this6.props.body[_this6.props.title],
-                  handleDialog: _this6.props.handleDialog
+                  handleDialog: _this6.props.handleDialog,
+                  question: _this6.props.question,
+                  title: _this6.props.title
                 }));
               },
               className: "Button Primary"
@@ -394,6 +407,61 @@ var Marking = function (_React$Component3) {
     value: function render() {
       var _this8 = this;
 
+      var groupHalf = Math.round(Object.keys(this.props.body).length / 2) - 1;
+      var bottomGroup = Object.keys(this.props.body).sort(function (a, b) {
+        return _this8.props.body[b]["totalScore"] - _this8.props.body[a]["totalScore"];
+      }).splice(0, groupHalf);
+      var upperGroup = Object.keys(this.props.body).sort(function (a, b) {
+        return _this8.props.body[b]["totalScore"] - _this8.props.body[a]["totalScore"];
+      }).splice(groupHalf, Object.keys(this.props.body).length);
+
+      /*
+      let upperTotal = upperGroup.map(
+        map =>
+          this.props.body[map]["marking"].filter((filter, index) => {
+            console.log(
+              "Upper : ",
+              index,
+              map,
+              filter,
+              choiceName[this.props.question[this.props.title][index]]
+            );
+            return (
+              filter == choiceName[this.props.question[this.props.title][index]]
+            );
+          }).length
+      );
+       let bottomTotal = bottomGroup.map(
+        map =>
+          this.props.body[map]["marking"].filter((filter, index) => {
+            console.log(
+              "Bottom : ",
+              index,
+              map,
+              filter,
+              choiceName[this.props.question[this.props.title][index]]
+            );
+            return (
+              filter == choiceName[this.props.question[this.props.title][index]]
+            );
+          }).length
+      );
+      */
+      var bottomTotal = [],
+          upperTotal = [];
+      var question = this.props.question[this.props.title];
+
+      question.forEach(function (each, index) {
+        bottomTotal.push(bottomGroup.filter(function (filter) {
+          return _this8.props.body[filter]["marking"][index] == choiceName[_this8.props.question[_this8.props.title][index]];
+        }).length);
+
+        upperTotal.push(upperGroup.filter(function (filter) {
+          return _this8.props.body[filter]["marking"][index] == choiceName[_this8.props.question[_this8.props.title][index]];
+        }).length);
+      });
+      console.log(this.props.question);
+
       var answerSheet = [];
       var markingResult = [];
       for (var key in this.props.body) {
@@ -412,6 +480,14 @@ var Marking = function (_React$Component3) {
             markingResult[x - 1] = { A: 0, B: 0, C: 0, D: 0, E: 0 };
           }
           var readyResult = markingResult[x - 1];
+          var dif = void 0;
+          if (bottomTotal.length > 0 && upperTotal.length > 0 && bottomGroup.length > 0 && upperGroup.length > 0) {
+            dif = Object.keys(this.props.question[this.props.title])[x - 1] ? Math.round((bottomTotal[x - 1] / bottomGroup.length - upperTotal[x - 1] / upperGroup.length) * 10) / 10 : "";
+          } else {
+            dif = "";
+          }
+
+          console.log(dif);
           totalAnswer.push(React.createElement(
             "tr",
             { className: "answerTable", key: x },
@@ -450,6 +526,16 @@ var Marking = function (_React$Component3) {
               "td",
               null,
               readyResult["E"] != 0 ? readyResult["E"] : ""
+            ),
+            React.createElement(
+              "td",
+              {
+                title: "\u0E04\u0E48\u0E32\u0E2D\u0E33\u0E19\u0E32\u0E08\u0E08\u0E33\u0E41\u0E19\u0E01",
+                style: {
+                  backgroundColor: dif >= 0.4 ? "rgba(0, 255, 0, 0.2)" : typeof dif == "string" ? "" : "rgba(255, 0, 0, 0.2)"
+                }
+              },
+              dif
             )
           ));
         }
@@ -457,7 +543,7 @@ var Marking = function (_React$Component3) {
           "table",
           {
             style: {
-              width: "130px",
+              width: "150px",
               display: "inline-block",
               fontSize: "13px"
             },
@@ -491,6 +577,11 @@ var Marking = function (_React$Component3) {
               "td",
               null,
               "\u0E08"
+            ),
+            React.createElement(
+              "td",
+              null,
+              "r"
             )
           ),
           totalAnswer
@@ -499,7 +590,7 @@ var Marking = function (_React$Component3) {
       return React.createElement(
         "div",
         {
-          style: { whiteSpace: "nowrap", overflowX: "auto", overflowY: "hidden" },
+          style: { whiteSpace: "nowrap" },
           onClick: function onClick() {
             return _this8.props.handleDialog.close();
           }

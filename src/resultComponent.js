@@ -1,10 +1,12 @@
 import { driveGet, driveUpdate } from "../drive.js";
+var choiceName = ["", "A", "B", "C", "D", "E"];
 
 export class ResultPage extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      body: {}
+      body: {},
+      question: {}
     };
   }
 
@@ -13,8 +15,21 @@ export class ResultPage extends React.Component {
       <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังโหลด ﱰ</div>
     );
     driveGet("result.json").then(res => {
-      this.setState({ body: res });
-      this.props.handleDialog.close();
+      driveGet("question.json").then(ques => {
+        this.setState({
+          body: res,
+          question: Object.keys(ques).reduce(
+            (total, map) =>
+              Object.assign(total, {
+                [map]: Object.keys(ques[map]).map(
+                  no => ques[map][no]["correct"]
+                )
+              }),
+            {}
+          )
+        });
+        this.props.handleDialog.close();
+      });
     });
   }
 
@@ -46,8 +61,6 @@ export class ResultPage extends React.Component {
       }
       sortedScore.sort((a, b) => a - b);
 
-      console.log(this.state.body, sortBody);
-
       resultList.push(
         <ResultCard
           avg={avg}
@@ -58,6 +71,7 @@ export class ResultPage extends React.Component {
           key={key}
           title={key}
           body={this.state.body}
+          question={this.state.question}
           handleDialog={this.props.handleDialog}
         />
       );
@@ -72,6 +86,7 @@ class ResultCard extends React.Component {
     this.state = {
       shown: false,
       body: this.props.body[this.props.title],
+      question: {},
       room: ""
     };
 
@@ -169,6 +184,8 @@ class ResultCard extends React.Component {
                 <Marking
                   body={this.props.body[this.props.title]}
                   handleDialog={this.props.handleDialog}
+                  question={this.props.question}
+                  title={this.props.title}
                 />
               )
             }
@@ -242,15 +259,17 @@ class ResultCard extends React.Component {
                         this.state.body[a].totalScore -
                         this.state.body[b].totalScore
                     )
-                    .map(map => (
-                      <tr key={map}>
-                        <td>{map + " "}</td>
-                        <td>{this.state.body[map].room}</td>
-                        <td style={{ textAlign: "right" }}>
-                          {this.state.body[map].totalScore}
-                        </td>
-                      </tr>
-                    ))}
+                    .map(map => {
+                      return (
+                        <tr key={map}>
+                          <td>{map + " "}</td>
+                          <td>{this.state.body[map].room}</td>
+                          <td style={{ textAlign: "right" }}>
+                            {this.state.body[map].totalScore}
+                          </td>
+                        </tr>
+                      );
+                    })}
                 </tbody>
               </table>
             </div>
@@ -273,6 +292,76 @@ class Marking extends React.Component {
   }
 
   render() {
+    let groupHalf = Math.round(Object.keys(this.props.body).length / 2) - 1;
+    let bottomGroup = Object.keys(this.props.body)
+      .sort(
+        (a, b) =>
+          this.props.body[b]["totalScore"] - this.props.body[a]["totalScore"]
+      )
+      .splice(0, groupHalf);
+    let upperGroup = Object.keys(this.props.body)
+      .sort(
+        (a, b) =>
+          this.props.body[b]["totalScore"] - this.props.body[a]["totalScore"]
+      )
+      .splice(groupHalf, Object.keys(this.props.body).length);
+
+    /*
+    let upperTotal = upperGroup.map(
+      map =>
+        this.props.body[map]["marking"].filter((filter, index) => {
+          console.log(
+            "Upper : ",
+            index,
+            map,
+            filter,
+            choiceName[this.props.question[this.props.title][index]]
+          );
+          return (
+            filter == choiceName[this.props.question[this.props.title][index]]
+          );
+        }).length
+    );
+
+    let bottomTotal = bottomGroup.map(
+      map =>
+        this.props.body[map]["marking"].filter((filter, index) => {
+          console.log(
+            "Bottom : ",
+            index,
+            map,
+            filter,
+            choiceName[this.props.question[this.props.title][index]]
+          );
+          return (
+            filter == choiceName[this.props.question[this.props.title][index]]
+          );
+        }).length
+    );
+    */
+    let bottomTotal = [],
+      upperTotal = [];
+    let question = this.props.question[this.props.title];
+
+    question.forEach((each, index) => {
+      bottomTotal.push(
+        bottomGroup.filter(
+          filter =>
+            this.props.body[filter]["marking"][index] ==
+            choiceName[this.props.question[this.props.title][index]]
+        ).length
+      );
+
+      upperTotal.push(
+        upperGroup.filter(
+          filter =>
+            this.props.body[filter]["marking"][index] ==
+            choiceName[this.props.question[this.props.title][index]]
+        ).length
+      );
+    });
+    console.log(this.props.question);
+
     let answerSheet = [];
     let markingResult = [];
     for (let key in this.props.body) {
@@ -291,6 +380,25 @@ class Marking extends React.Component {
           markingResult[x - 1] = { A: 0, B: 0, C: 0, D: 0, E: 0 };
         }
         const readyResult = markingResult[x - 1];
+        let dif;
+        if (
+          bottomTotal.length > 0 &&
+          upperTotal.length > 0 &&
+          bottomGroup.length > 0 &&
+          upperGroup.length > 0
+        ) {
+          dif = Object.keys(this.props.question[this.props.title])[x - 1]
+            ? Math.round(
+                (bottomTotal[x - 1] / bottomGroup.length -
+                  upperTotal[x - 1] / upperGroup.length) *
+                  10
+              ) / 10
+            : "";
+        } else {
+          dif = "";
+        }
+
+        console.log(dif);
         totalAnswer.push(
           <tr className="answerTable" key={x}>
             <td
@@ -307,13 +415,26 @@ class Marking extends React.Component {
             <td>{readyResult["C"] != 0 ? readyResult["C"] : ""}</td>
             <td>{readyResult["D"] != 0 ? readyResult["D"] : ""}</td>
             <td>{readyResult["E"] != 0 ? readyResult["E"] : ""}</td>
+            <td
+              title="ค่าอำนาจจำแนก"
+              style={{
+                backgroundColor:
+                  dif >= 0.4
+                    ? "rgba(0, 255, 0, 0.2)"
+                    : typeof dif == "string"
+                    ? ""
+                    : "rgba(255, 0, 0, 0.2)"
+              }}
+            >
+              {dif}
+            </td>
           </tr>
         );
       }
       answerSheet.push(
         <table
           style={{
-            width: "130px",
+            width: "150px",
             display: "inline-block",
             fontSize: "13px"
           }}
@@ -326,6 +447,7 @@ class Marking extends React.Component {
             <td>ค</td>
             <td>ง</td>
             <td>จ</td>
+            <td>r</td>
           </tr>
           {totalAnswer}
         </table>
@@ -333,7 +455,7 @@ class Marking extends React.Component {
     }
     return (
       <div
-        style={{ whiteSpace: "nowrap", overflowX: "auto", overflowY: "hidden" }}
+        style={{ whiteSpace: "nowrap" }}
         onClick={() => this.props.handleDialog.close()}
       >
         {answerSheet}
