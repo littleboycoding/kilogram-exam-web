@@ -662,8 +662,21 @@ function questionPrint(data) {
   let printWindow = window.open("", "printWindow");
 
   printWindow.document.write(
-    "<body><style>@media print { body { margin: 15mm 15mm 15mm 15mm; } }</style><title>ปริ้นแบบทดสอบ</title><h2>บททดสอบ</h2><p><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><hr>" +
+    `<body><style>.editable { border-bottom: 1px dashed #AAA; padding-bottom: 5px; } .img:hover { opacity: 0.2; cursor: pointer; } @media print { body { margin: 15mm 15mm 15mm 15mm; } button { display: none !important; } .editable { border: none !important; padding: none !important; }</style><title>ปริ้นแบบทดสอบ</title><h2 class='editable' contenteditable='true'><input type='file' oninput='change_img(event)' style='display: none;' id='file' accept='image/*'><img class='img' onclick="document.getElementById('file').click()" src='favicon.png' style='vertical-align: middle; height: 45px;'/> บททดสอบ</h2><p class='editable' contenteditable='true'><b>คำชี้แจ้ง</b> จงเลือกคำตอบที่ถูกต้องที่สุด</p><button onClick='print()'>พิมพ์</button><hr>` +
       htmlResult.join("<hr >") +
-      "<script>setTimeout(() => print(), 1000);</script></body>"
+      `
+	<script>
+		function change_img(e) {
+			let target = e.target.files[0];
+			let reader = new FileReader;
+
+			reader.onload = e => {
+				document.getElementsByClassName('img')[0].src = e.target.result;
+			}
+
+			reader.readAsDataURL(target);
+		}
+	</script>
+	  </body>`
   );
 }
