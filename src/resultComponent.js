@@ -289,10 +289,15 @@ function DistinctList(props) {
 class Marking extends React.Component {
   constructor(props) {
     super(props);
+
+    this.state = {
+      dif: 0,
+      hard: 0
+    }
   }
 
   render() {
-    let groupHalf = Math.round(Object.keys(this.props.body).length / 2) - 1;
+    let groupHalf = Math.round(Object.keys(this.props.body).length / 2);
     let bottomGroup = Object.keys(this.props.body)
       .sort(
         (a, b) =>
@@ -360,7 +365,6 @@ class Marking extends React.Component {
         ).length
       );
     });
-    console.log(this.props.question);
 
     let answerSheet = [];
     let markingResult = [];
@@ -397,8 +401,13 @@ class Marking extends React.Component {
         } else {
           dif = "";
         }
-
-        console.log(dif);
+        let hard;
+        let holdCorrect = this.props.question[this.props.title][x - 1]
+        if (x <= this.props.question[this.props.title].length) {
+          hard = (Object.keys(this.props.body).filter(filter => this.props.body[filter]["marking"][x - 1] == choiceName[holdCorrect]).length) / Object.keys(this.props.body).length
+        } else {
+          hard = ""
+        }
         totalAnswer.push(
           <tr className="answerTable" key={x}>
             <td
@@ -410,12 +419,12 @@ class Marking extends React.Component {
             >
               {x}
             </td>
-            <td>{readyResult["A"] != 0 ? readyResult["A"] : ""}</td>
-            <td>{readyResult["B"] != 0 ? readyResult["B"] : ""}</td>
-            <td>{readyResult["C"] != 0 ? readyResult["C"] : ""}</td>
-            <td>{readyResult["D"] != 0 ? readyResult["D"] : ""}</td>
-            <td>{readyResult["E"] != 0 ? readyResult["E"] : ""}</td>
-            <td
+            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["A"] != 0 ? readyResult["A"] : ""}</td>
+            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["B"] != 0 ? readyResult["B"] : ""}</td>
+            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["C"] != 0 ? readyResult["C"] : ""}</td>
+            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["D"] != 0 ? readyResult["D"] : ""}</td>
+            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["E"] != 0 ? readyResult["E"] : ""}</td>
+            {/* <td
               title="ค่าอำนาจจำแนก"
               style={{
                 backgroundColor:
@@ -427,14 +436,14 @@ class Marking extends React.Component {
               }}
             >
               {dif}
-            </td>
+            </td> */}
           </tr>
         );
       }
       answerSheet.push(
         <table
           style={{
-            width: "150px",
+            width: "130px",
             display: "inline-block",
             fontSize: "13px"
           }}
@@ -447,7 +456,6 @@ class Marking extends React.Component {
             <td>ค</td>
             <td>ง</td>
             <td>จ</td>
-            <td>r</td>
           </tr>
           {totalAnswer}
         </table>
@@ -459,6 +467,8 @@ class Marking extends React.Component {
         onClick={() => this.props.handleDialog.close()}
       >
         {answerSheet}
+        <br /><br />
+        {`${typeof this.state.dif != "string" ? "ค่าอำนาจจำแนก " + this.state.dif : "" } ค่าความยากง่ายของคำถาม ${this.state.hard}`}
       </div>
     );
   }

@@ -236,3 +236,8 @@ body {
   cursor: pointer;
   opacity: 0.6;
 }
+.tdHover:hover {
+  background-color: #999 !important;
+  color: white;
+  cursor: pointer;
+}

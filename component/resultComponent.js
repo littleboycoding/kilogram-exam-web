@@ -399,7 +399,13 @@ var Marking = function (_React$Component3) {
   function Marking(props) {
     _classCallCheck(this, Marking);
 
-    return _possibleConstructorReturn(this, (Marking.__proto__ || Object.getPrototypeOf(Marking)).call(this, props));
+    var _this7 = _possibleConstructorReturn(this, (Marking.__proto__ || Object.getPrototypeOf(Marking)).call(this, props));
+
+    _this7.state = {
+      dif: 0,
+      hard: 0
+    };
+    return _this7;
   }
 
   _createClass(Marking, [{
@@ -407,7 +413,7 @@ var Marking = function (_React$Component3) {
     value: function render() {
       var _this8 = this;
 
-      var groupHalf = Math.round(Object.keys(this.props.body).length / 2) - 1;
+      var groupHalf = Math.round(Object.keys(this.props.body).length / 2);
       var bottomGroup = Object.keys(this.props.body).sort(function (a, b) {
         return _this8.props.body[b]["totalScore"] - _this8.props.body[a]["totalScore"];
       }).splice(0, groupHalf);
@@ -460,7 +466,6 @@ var Marking = function (_React$Component3) {
           return _this8.props.body[filter]["marking"][index] == choiceName[_this8.props.question[_this8.props.title][index]];
         }).length);
       });
-      console.log(this.props.question);
 
       var answerSheet = [];
       var markingResult = [];
@@ -475,19 +480,27 @@ var Marking = function (_React$Component3) {
       }
       for (var i = 1; i <= 4; i++) {
         var totalAnswer = [];
-        for (var x = i * 25 - 24; x <= i * 25; x++) {
+
+        var _loop2 = function _loop2(x) {
           if (markingResult[x - 1] == undefined) {
             markingResult[x - 1] = { A: 0, B: 0, C: 0, D: 0, E: 0 };
           }
           var readyResult = markingResult[x - 1];
           var dif = void 0;
           if (bottomTotal.length > 0 && upperTotal.length > 0 && bottomGroup.length > 0 && upperGroup.length > 0) {
-            dif = Object.keys(this.props.question[this.props.title])[x - 1] ? Math.round((bottomTotal[x - 1] / bottomGroup.length - upperTotal[x - 1] / upperGroup.length) * 10) / 10 : "";
+            dif = Object.keys(_this8.props.question[_this8.props.title])[x - 1] ? Math.round((bottomTotal[x - 1] / bottomGroup.length - upperTotal[x - 1] / upperGroup.length) * 10) / 10 : "";
           } else {
             dif = "";
           }
-
-          console.log(dif);
+          var hard = void 0;
+          var holdCorrect = _this8.props.question[_this8.props.title][x - 1];
+          if (x <= _this8.props.question[_this8.props.title].length) {
+            hard = Object.keys(_this8.props.body).filter(function (filter) {
+              return _this8.props.body[filter]["marking"][x - 1] == choiceName[holdCorrect];
+            }).length / Object.keys(_this8.props.body).length;
+          } else {
+            hard = "";
+          }
           totalAnswer.push(React.createElement(
             "tr",
             { className: "answerTable", key: x },
@@ -504,46 +517,50 @@ var Marking = function (_React$Component3) {
             ),
             React.createElement(
               "td",
-              null,
+              { className: "tdHover", onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
+                } },
               readyResult["A"] != 0 ? readyResult["A"] : ""
             ),
             React.createElement(
               "td",
-              null,
+              { className: "tdHover", onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
+                } },
               readyResult["B"] != 0 ? readyResult["B"] : ""
             ),
             React.createElement(
               "td",
-              null,
+              { className: "tdHover", onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
+                } },
               readyResult["C"] != 0 ? readyResult["C"] : ""
             ),
             React.createElement(
               "td",
-              null,
+              { className: "tdHover", onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
+                } },
               readyResult["D"] != 0 ? readyResult["D"] : ""
             ),
             React.createElement(
               "td",
-              null,
+              { className: "tdHover", onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
+                } },
               readyResult["E"] != 0 ? readyResult["E"] : ""
-            ),
-            React.createElement(
-              "td",
-              {
-                title: "\u0E04\u0E48\u0E32\u0E2D\u0E33\u0E19\u0E32\u0E08\u0E08\u0E33\u0E41\u0E19\u0E01",
-                style: {
-                  backgroundColor: dif >= 0.4 ? "rgba(0, 255, 0, 0.2)" : typeof dif == "string" ? "" : "rgba(255, 0, 0, 0.2)"
-                }
-              },
-              dif
             )
           ));
+        };
+
+        for (var x = i * 25 - 24; x <= i * 25; x++) {
+          _loop2(x);
         }
         answerSheet.push(React.createElement(
           "table",
           {
             style: {
-              width: "150px",
+              width: "130px",
               display: "inline-block",
               fontSize: "13px"
             },
@@ -577,11 +594,6 @@ var Marking = function (_React$Component3) {
               "td",
               null,
               "\u0E08"
-            ),
-            React.createElement(
-              "td",
-              null,
-              "r"
             )
           ),
           totalAnswer
@@ -595,7 +607,10 @@ var Marking = function (_React$Component3) {
             return _this8.props.handleDialog.close();
           }
         },
-        answerSheet
+        answerSheet,
+        React.createElement("br", null),
+        React.createElement("br", null),
+        (typeof this.state.dif != "string" ? "ค่าอำนาจจำแนก " + this.state.dif : "") + " \u0E04\u0E48\u0E32\u0E04\u0E27\u0E32\u0E21\u0E22\u0E32\u0E01\u0E07\u0E48\u0E32\u0E22\u0E02\u0E2D\u0E07\u0E04\u0E33\u0E16\u0E32\u0E21 " + this.state.hard
       );
     }
   }]);
