@@ -517,37 +517,52 @@ var Marking = function (_React$Component3) {
             ),
             React.createElement(
               "td",
-              { className: "tdHover", onMouseOver: function onMouseOver() {
-                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
-                } },
+              {
+                className: "tdHover",
+                onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: Number(hard.toFixed(2)) });
+                }
+              },
               readyResult["A"] != 0 ? readyResult["A"] : ""
             ),
             React.createElement(
               "td",
-              { className: "tdHover", onMouseOver: function onMouseOver() {
-                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
-                } },
+              {
+                className: "tdHover",
+                onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: Number(hard.toFixed(2)) });
+                }
+              },
               readyResult["B"] != 0 ? readyResult["B"] : ""
             ),
             React.createElement(
               "td",
-              { className: "tdHover", onMouseOver: function onMouseOver() {
-                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
-                } },
+              {
+                className: "tdHover",
+                onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: Number(hard.toFixed(2)) });
+                }
+              },
               readyResult["C"] != 0 ? readyResult["C"] : ""
             ),
             React.createElement(
               "td",
-              { className: "tdHover", onMouseOver: function onMouseOver() {
-                  return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
-                } },
+              {
+                className: "tdHover",
+                onMouseOver: function onMouseOver() {
+                  return _this8.setState({ dif: dif, hard: Number(hard.toFixed(2)) });
+                }
+              },
               readyResult["D"] != 0 ? readyResult["D"] : ""
             ),
             React.createElement(
               "td",
-              { className: "tdHover", onMouseOver: function onMouseOver() {
+              {
+                className: "tdHover",
+                onMouseOver: function onMouseOver() {
                   return _this8.setState({ dif: dif, hard: hard.toFixed(2) });
-                } },
+                }
+              },
               readyResult["E"] != 0 ? readyResult["E"] : ""
             )
           ));
@@ -599,6 +614,34 @@ var Marking = function (_React$Component3) {
           totalAnswer
         ));
       }
+
+      var difTran = void 0,
+          hardTran = void 0;
+
+      console.log(this.state.dif);
+
+      if (this.state.dif <= 0.19) {
+        difTran = "จำแนกได้ไม่ดี";
+      } else if (this.state.dif <= 0.29) {
+        difTran = "จำแนกได้น้อย";
+      } else if (this.state.dif <= 0.39) {
+        difTran = "จำแนกพอใช้";
+      } else {
+        difTran = "จำแนกได้ดี";
+      }
+
+      if (this.state.hard <= 0.19) {
+        hardTran = "ยากมาก";
+      } else if (this.state.hard <= 0.39) {
+        hardTran = "ค่อนข้างยาก";
+      } else if (this.state.hard <= 0.59) {
+        hardTran = "ปานกลาง";
+      } else if (this.state.hard <= 0.79) {
+        hardTran = "ค่อนข้างง่าย";
+      } else {
+        hardTran = "ง่ายมาก";
+      }
+
       return React.createElement(
         "div",
         {
@@ -610,7 +653,9 @@ var Marking = function (_React$Component3) {
         answerSheet,
         React.createElement("br", null),
         React.createElement("br", null),
-        (typeof this.state.dif != "string" ? "ค่าอำนาจจำแนก " + this.state.dif : "") + " \u0E04\u0E48\u0E32\u0E04\u0E27\u0E32\u0E21\u0E22\u0E32\u0E01\u0E07\u0E48\u0E32\u0E22\u0E02\u0E2D\u0E07\u0E04\u0E33\u0E16\u0E32\u0E21 " + this.state.hard
+        "" + (typeof this.state.dif != "string" ? "ค่าอำนาจจำแนก (R) " + this.state.dif + (" (" + difTran + ")") : ""),
+        React.createElement("br", null),
+        "\u0E04\u0E48\u0E32\u0E04\u0E27\u0E32\u0E21\u0E22\u0E32\u0E01\u0E07\u0E48\u0E32\u0E22\u0E02\u0E2D\u0E07\u0E04\u0E33\u0E16\u0E32\u0E21 (P) " + this.state.hard + " (" + hardTran + ")"
       );
     }
   }]);

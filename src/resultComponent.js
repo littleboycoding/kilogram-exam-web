@@ -293,7 +293,7 @@ class Marking extends React.Component {
     this.state = {
       dif: 0,
       hard: 0
-    }
+    };
   }
 
   render() {
@@ -402,11 +402,16 @@ class Marking extends React.Component {
           dif = "";
         }
         let hard;
-        let holdCorrect = this.props.question[this.props.title][x - 1]
+        let holdCorrect = this.props.question[this.props.title][x - 1];
         if (x <= this.props.question[this.props.title].length) {
-          hard = (Object.keys(this.props.body).filter(filter => this.props.body[filter]["marking"][x - 1] == choiceName[holdCorrect]).length) / Object.keys(this.props.body).length
+          hard =
+            Object.keys(this.props.body).filter(
+              filter =>
+                this.props.body[filter]["marking"][x - 1] ==
+                choiceName[holdCorrect]
+            ).length / Object.keys(this.props.body).length;
         } else {
-          hard = ""
+          hard = "";
         }
         totalAnswer.push(
           <tr className="answerTable" key={x}>
@@ -419,11 +424,46 @@ class Marking extends React.Component {
             >
               {x}
             </td>
-            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["A"] != 0 ? readyResult["A"] : ""}</td>
-            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["B"] != 0 ? readyResult["B"] : ""}</td>
-            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["C"] != 0 ? readyResult["C"] : ""}</td>
-            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["D"] != 0 ? readyResult["D"] : ""}</td>
-            <td className="tdHover" onMouseOver={() => this.setState({dif: dif, hard: hard.toFixed(2)})} >{readyResult["E"] != 0 ? readyResult["E"] : ""}</td>
+            <td
+              className="tdHover"
+              onMouseOver={() =>
+                this.setState({ dif: dif, hard: Number(hard.toFixed(2)) })
+              }
+            >
+              {readyResult["A"] != 0 ? readyResult["A"] : ""}
+            </td>
+            <td
+              className="tdHover"
+              onMouseOver={() =>
+                this.setState({ dif: dif, hard: Number(hard.toFixed(2)) })
+              }
+            >
+              {readyResult["B"] != 0 ? readyResult["B"] : ""}
+            </td>
+            <td
+              className="tdHover"
+              onMouseOver={() =>
+                this.setState({ dif: dif, hard: Number(hard.toFixed(2)) })
+              }
+            >
+              {readyResult["C"] != 0 ? readyResult["C"] : ""}
+            </td>
+            <td
+              className="tdHover"
+              onMouseOver={() =>
+                this.setState({ dif: dif, hard: Number(hard.toFixed(2)) })
+              }
+            >
+              {readyResult["D"] != 0 ? readyResult["D"] : ""}
+            </td>
+            <td
+              className="tdHover"
+              onMouseOver={() =>
+                this.setState({ dif: dif, hard: hard.toFixed(2) })
+              }
+            >
+              {readyResult["E"] != 0 ? readyResult["E"] : ""}
+            </td>
             {/* <td
               title="ค่าอำนาจจำแนก"
               style={{
@@ -461,14 +501,48 @@ class Marking extends React.Component {
         </table>
       );
     }
+
+    let difTran, hardTran;
+
+    console.log(this.state.dif);
+
+    if (this.state.dif <= 0.19) {
+      difTran = "จำแนกได้ไม่ดี";
+    } else if (this.state.dif <= 0.29) {
+      difTran = "จำแนกได้น้อย";
+    } else if (this.state.dif <= 0.39) {
+      difTran = "จำแนกพอใช้";
+    } else {
+      difTran = "จำแนกได้ดี";
+    }
+
+    if (this.state.hard <= 0.19) {
+      hardTran = "ยากมาก";
+    } else if (this.state.hard <= 0.39) {
+      hardTran = "ค่อนข้างยาก";
+    } else if (this.state.hard <= 0.59) {
+      hardTran = "ปานกลาง";
+    } else if (this.state.hard <= 0.79) {
+      hardTran = "ค่อนข้างง่าย";
+    } else {
+      hardTran = "ง่ายมาก";
+    }
+
     return (
       <div
         style={{ whiteSpace: "nowrap" }}
         onClick={() => this.props.handleDialog.close()}
       >
         {answerSheet}
-        <br /><br />
-        {`${typeof this.state.dif != "string" ? "ค่าอำนาจจำแนก " + this.state.dif : "" } ค่าความยากง่ายของคำถาม ${this.state.hard}`}
+        <br />
+        <br />
+        {`${
+          typeof this.state.dif != "string"
+            ? "ค่าอำนาจจำแนก (R) " + this.state.dif + ` (${difTran})`
+            : ""
+        }`}
+        <br />
+        {`ค่าความยากง่ายของคำถาม (P) ${this.state.hard} (${hardTran})`}
       </div>
     );
   }
