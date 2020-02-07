@@ -1,5 +1,6 @@
 import { driveGet, driveUpdate } from "../drive.js";
 var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "จ" };
+var markNameReverse = { ก: 1, ข: 2, ค: 3, ง: 4, จ: 5 };
 
 class CreateNewQuestion extends React.Component {
   constructor(props) {
@@ -47,6 +48,28 @@ class CreateNewQuestion extends React.Component {
     event.preventDefault();
   }
 
+  handleXLSX() {
+    let file = document.getElementById("XLSX");
+    file.click();
+    file.onchange = e => {
+      let input = e.target.files[0];
+      let reader = new FileReader();
+      reader.onload = e => {
+        let data = new Uint8Array(e.target.result);
+        let workbook = XLSX.read(data, { type: "array" });
+
+        this.props.handleDialog.open(
+          <TableXLSX
+            body={this.props.body}
+            workbook={workbook}
+            handleDialog={this.props.handleDialog}
+          />
+        );
+      };
+      reader.readAsArrayBuffer(input);
+    };
+  }
+
   render() {
     if (!this.state.loading) {
       return (
@@ -54,6 +77,21 @@ class CreateNewQuestion extends React.Component {
           <div style={{ fontSize: 20, marginBottom: 15 }}>
             ตั้งชื่อข้อสอบใหม่
           </div>
+          <button
+            onClick={this.handleXLSX.bind(this)}
+            className="Button Secondary"
+          >
+            หรือเพิ่มจากไฟล์ XLSX
+          </button>
+          <input
+            style={{ display: "none" }}
+            accept=".xlsx"
+            type="file"
+            required
+            id="XLSX"
+          />
+          <br />
+          <br />
           <form onSubmit={this.handleSubmit}>
             <input
               className="Input"
@@ -85,6 +123,298 @@ class CreateNewQuestion extends React.Component {
         <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังส่งข้อมูล ﱰ</div>
       );
     }
+  }
+}
+
+class TableXLSX extends React.Component {
+  constructor(props) {
+    super(props);
+    this.column = [
+      "คำถาม",
+      "คำตอบ ก",
+      "คำตอบ ข",
+      "คำตอบ ค",
+      "คำตอบ ง",
+      "คำตอบ จ",
+      "คำตอบที่ถูกต้อง",
+      "รูปภาพคำถาม",
+      "รูปภาพคำตอบ ก",
+      "รูปภาพคำตอบ ข",
+      "รูปภาพคำตอบ ค",
+      "รูปภาพคำตอบ ง",
+      "รูปภาพคำตอบ จ"
+    ];
+    this.state = {
+      title: "",
+      sheet: this.props.workbook.SheetNames[0],
+      column: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    };
+    this.handleSheetChange = this.handleSheetChange.bind(this);
+    this.handleClick = this.handleClick.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.titleChange = this.titleChange.bind(this);
+
+    console.log(this.props.body);
+  }
+
+  handleSubmit(event) {
+    if (this.state.column.every(every => every != null)) {
+      let sheet = this.props.workbook.Sheets[this.state.sheet];
+      let body = Object.assign({}, this.props.body);
+      let data = [];
+      this.state.column.forEach(column => {
+        data.push(
+          Object.keys(sheet).filter(
+            filter => filter.replace(/[0-9]/g, "") == column
+          )
+        );
+      });
+      Object.assign(body, { [this.state.title]: {} });
+      for (let i = 1; i < data[0].length; i++) {
+        Object.assign(body[this.state.title], {
+          [i]: {
+            answer: {
+              1: data[1][i] ? sheet[data[1][i]].w : "",
+              2: data[2][i] ? sheet[data[2][i]].w : "",
+              3: data[3][i] ? sheet[data[3][i]].w : "",
+              4: data[4][i] ? sheet[data[4][i]].w : "",
+              5: data[5][i] ? sheet[data[5][i]].w : ""
+            },
+            correct: data[6][i] ? markNameReverse[sheet[data[6][i]].w] : "",
+            title: data[0][i] ? sheet[data[0][i]].w : "",
+            choice_img: {
+              1: data[8][i] ? sheet[data[8][i]].w : "",
+              2: data[9][i] ? sheet[data[9][i]].w : "",
+              3: data[10][i] ? sheet[data[10][i]].w : "",
+              4: data[11][i] ? sheet[data[11][i]].w : "",
+              5: data[12][i] ? sheet[data[12][i]].w : ""
+            },
+            question_img: data[7][i] ? sheet[data[7][i]].w : ""
+          }
+        });
+      }
+
+      console.log(body);
+      this.props.handleDialog.open(
+        <div style={{ fontSize: 20, marginBottom: 15 }}>กำลังส่งข้อมูล ﱰ</div>
+      );
+      driveUpdate("question.json", body).then(res =>
+        this.props.handleDialog.close(
+          <QuestionPage handleDialog={this.props.handleDialog} />
+        )
+      );
+    }
+    event.preventDefault();
+  }
+
+  handleSheetChange(event) {
+    this.setState({
+      sheet: event.target.value,
+      column: [
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null,
+        null
+      ]
+    });
+  }
+
+  handleBackground(e, color, locked) {
+    if (e.target.id != "xlsx_table") {
+      let xlsx_table = document.getElementById("xlsx_table");
+      let xlsx_column = e.target.id.substring(11).replace(/[0-9]/g, "");
+      let tr = xlsx_table.children[0].children;
+      for (let i = 0; i < tr.length; i++) {
+        let td = tr[i].children;
+        for (let x = 0; x < td.length; x++) {
+          if (td[x].style.backgroundColor != "rgb(221, 221, 221)") {
+            if (td[x].id.substring(11).replace(/[0-9]/g, "") == xlsx_column) {
+              td[x].style.backgroundColor = color;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  handleClick(event) {
+    if (
+      event.target.id != "xlsx_table" &&
+      this.state.column.some(some => some == null)
+    ) {
+      let xlsx_column = event.target.id.substring(11).replace(/[0-9]/g, "");
+      if (!this.state.column.some(some => some == xlsx_column)) {
+        let column = this.state.column;
+        column[column.findIndex(find => find == null)] = xlsx_column;
+        this.setState({
+          column: column
+        });
+        this.handleBackground(event, "#DDD", true);
+      }
+    }
+  }
+
+  titleChange(e) {
+    this.setState({
+      title: e.target.value
+    });
+  }
+
+  render() {
+    return (
+      <div>
+        <form onSubmit={this.handleSubmit}>
+          <input
+            type="text"
+            placeholder="ชื่อข้อสอบ"
+            required={true}
+            className="Input"
+            style={{ width: "100%" }}
+            onChange={this.titleChange}
+            value={this.state.title}
+          />
+          <br />
+          <br />
+          <select
+            onChange={this.handleSheetChange}
+            className="Input"
+            style={{
+              width: "100%",
+              backgroundColor: "white",
+              marginBottom: "10px"
+            }}
+          >
+            {this.props.workbook.SheetNames.map(map => (
+              <option>{map}</option>
+            ))}
+          </select>
+          <div
+            onClick={this.handleClick}
+            onMouseOver={() => this.handleBackground(event, "#CCC", false)}
+            onMouseOut={() => this.handleBackground(event, "#FFF", false)}
+            className="xlsx_table_container"
+            dangerouslySetInnerHTML={{
+              __html: XLSX.utils.sheet_to_html(
+                this.props.workbook.Sheets[this.state.sheet],
+                {
+                  id: "xlsx_table"
+                }
+              )
+            }}
+          ></div>
+          <div style={{ display: "none" }}>
+            {setTimeout(() => {
+              document
+                .querySelectorAll("[id^='xlsx_table-M']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+              document
+                .querySelectorAll("[id^='xlsx_table-L']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+              document
+                .querySelectorAll("[id^='xlsx_table-K']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+              document
+                .querySelectorAll("[id^='xlsx_table-J']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+              document
+                .querySelectorAll("[id^='xlsx_table-I']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+              document
+                .querySelectorAll("[id^='xlsx_table-H']")
+                .forEach((each, index) => {
+                  if (index > 0) {
+                    each.innerHTML.search(/^<img/) != 0 && each.innerHTML != ""
+                      ? (each.innerHTML = `<img style="width: 100px; height: 50px; object-fit: contain;" src="${each.innerHTML}" />`)
+                      : each.innerHTML;
+                  }
+                });
+            }, 1000)}
+            }
+          </div>
+          <br />
+          {this.state.column.some(some => some == null) ? (
+            <span>
+              {"กรุณาเลือกคอลัมน์ - " +
+                this.column[this.state.column.findIndex(find => find == null)]}
+              <br />
+              <br />
+            </span>
+          ) : (
+            ""
+          )}
+          <button
+            onClick={() => this.props.handleDialog.close()}
+            className="Button"
+          >
+            ยกเลิก
+          </button>
+          <button
+            type="submit"
+            style={{ marginLeft: "10px" }}
+            className={
+              (this.state.column.every(every => every != null)
+                ? ""
+                : "Disabled") + " Button Primary"
+            }
+          >
+            บันทึก
+          </button>
+        </form>
+      </div>
+    );
   }
 }
 

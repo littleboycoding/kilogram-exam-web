@@ -10,6 +10,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 
 import { driveGet, driveUpdate } from "../drive.js";
 var markName = { 1: "ก", 2: "ข", 3: "ค", 4: "ง", 5: "จ" };
+var markNameReverse = { ก: 1, ข: 2, ค: 3, ง: 4, จ: 5 };
 
 var CreateNewQuestion = function (_React$Component) {
   _inherits(CreateNewQuestion, _React$Component);
@@ -70,9 +71,32 @@ var CreateNewQuestion = function (_React$Component) {
       event.preventDefault();
     }
   }, {
+    key: "handleXLSX",
+    value: function handleXLSX() {
+      var _this3 = this;
+
+      var file = document.getElementById("XLSX");
+      file.click();
+      file.onchange = function (e) {
+        var input = e.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (e) {
+          var data = new Uint8Array(e.target.result);
+          var workbook = XLSX.read(data, { type: "array" });
+
+          _this3.props.handleDialog.open(React.createElement(TableXLSX, {
+            body: _this3.props.body,
+            workbook: workbook,
+            handleDialog: _this3.props.handleDialog
+          }));
+        };
+        reader.readAsArrayBuffer(input);
+      };
+    }
+  }, {
     key: "render",
     value: function render() {
-      var _this3 = this;
+      var _this4 = this;
 
       if (!this.state.loading) {
         return React.createElement(
@@ -83,6 +107,23 @@ var CreateNewQuestion = function (_React$Component) {
             { style: { fontSize: 20, marginBottom: 15 } },
             "\u0E15\u0E31\u0E49\u0E07\u0E0A\u0E37\u0E48\u0E2D\u0E02\u0E49\u0E2D\u0E2A\u0E2D\u0E1A\u0E43\u0E2B\u0E21\u0E48"
           ),
+          React.createElement(
+            "button",
+            {
+              onClick: this.handleXLSX.bind(this),
+              className: "Button Secondary"
+            },
+            "\u0E2B\u0E23\u0E37\u0E2D\u0E40\u0E1E\u0E34\u0E48\u0E21\u0E08\u0E32\u0E01\u0E44\u0E1F\u0E25\u0E4C XLSX"
+          ),
+          React.createElement("input", {
+            style: { display: "none" },
+            accept: ".xlsx",
+            type: "file",
+            required: true,
+            id: "XLSX"
+          }),
+          React.createElement("br", null),
+          React.createElement("br", null),
           React.createElement(
             "form",
             { onSubmit: this.handleSubmit },
@@ -101,7 +142,7 @@ var CreateNewQuestion = function (_React$Component) {
               value: "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01",
               style: { margin: 15, marginBottom: 0 },
               onClick: function onClick() {
-                return _this3.props.handleDialog.close();
+                return _this4.props.handleDialog.close();
               }
             }),
             React.createElement("input", {
@@ -125,27 +166,290 @@ var CreateNewQuestion = function (_React$Component) {
   return CreateNewQuestion;
 }(React.Component);
 
-var QuestionDelete = function (_React$Component2) {
-  _inherits(QuestionDelete, _React$Component2);
+var TableXLSX = function (_React$Component2) {
+  _inherits(TableXLSX, _React$Component2);
+
+  function TableXLSX(props) {
+    _classCallCheck(this, TableXLSX);
+
+    var _this5 = _possibleConstructorReturn(this, (TableXLSX.__proto__ || Object.getPrototypeOf(TableXLSX)).call(this, props));
+
+    _this5.column = ["คำถาม", "คำตอบ ก", "คำตอบ ข", "คำตอบ ค", "คำตอบ ง", "คำตอบ จ", "คำตอบที่ถูกต้อง", "รูปภาพคำถาม", "รูปภาพคำตอบ ก", "รูปภาพคำตอบ ข", "รูปภาพคำตอบ ค", "รูปภาพคำตอบ ง", "รูปภาพคำตอบ จ"];
+    _this5.state = {
+      title: "",
+      sheet: _this5.props.workbook.SheetNames[0],
+      column: [null, null, null, null, null, null, null, null, null, null, null, null, null]
+    };
+    _this5.handleSheetChange = _this5.handleSheetChange.bind(_this5);
+    _this5.handleClick = _this5.handleClick.bind(_this5);
+    _this5.handleSubmit = _this5.handleSubmit.bind(_this5);
+    _this5.titleChange = _this5.titleChange.bind(_this5);
+
+    console.log(_this5.props.body);
+    return _this5;
+  }
+
+  _createClass(TableXLSX, [{
+    key: "handleSubmit",
+    value: function handleSubmit(event) {
+      var _this6 = this;
+
+      if (this.state.column.every(function (every) {
+        return every != null;
+      })) {
+        var sheet = this.props.workbook.Sheets[this.state.sheet];
+        var body = Object.assign({}, this.props.body);
+        var data = [];
+        this.state.column.forEach(function (column) {
+          data.push(Object.keys(sheet).filter(function (filter) {
+            return filter.replace(/[0-9]/g, "") == column;
+          }));
+        });
+        Object.assign(body, _defineProperty({}, this.state.title, {}));
+        for (var i = 1; i < data[0].length; i++) {
+          Object.assign(body[this.state.title], _defineProperty({}, i, {
+            answer: {
+              1: data[1][i] ? sheet[data[1][i]].w : "",
+              2: data[2][i] ? sheet[data[2][i]].w : "",
+              3: data[3][i] ? sheet[data[3][i]].w : "",
+              4: data[4][i] ? sheet[data[4][i]].w : "",
+              5: data[5][i] ? sheet[data[5][i]].w : ""
+            },
+            correct: data[6][i] ? markNameReverse[sheet[data[6][i]].w] : "",
+            title: data[0][i] ? sheet[data[0][i]].w : "",
+            choice_img: {
+              1: data[8][i] ? sheet[data[8][i]].w : "",
+              2: data[9][i] ? sheet[data[9][i]].w : "",
+              3: data[10][i] ? sheet[data[10][i]].w : "",
+              4: data[11][i] ? sheet[data[11][i]].w : "",
+              5: data[12][i] ? sheet[data[12][i]].w : ""
+            },
+            question_img: data[7][i] ? sheet[data[7][i]].w : ""
+          }));
+        }
+
+        console.log(body);
+        this.props.handleDialog.open(React.createElement(
+          "div",
+          { style: { fontSize: 20, marginBottom: 15 } },
+          "\u0E01\u0E33\u0E25\u0E31\u0E07\u0E2A\u0E48\u0E07\u0E02\u0E49\u0E2D\u0E21\u0E39\u0E25 \uFC70"
+        ));
+        driveUpdate("question.json", body).then(function (res) {
+          return _this6.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this6.props.handleDialog }));
+        });
+      }
+      event.preventDefault();
+    }
+  }, {
+    key: "handleSheetChange",
+    value: function handleSheetChange(event) {
+      this.setState({
+        sheet: event.target.value,
+        column: [null, null, null, null, null, null, null, null, null, null, null, null, null]
+      });
+    }
+  }, {
+    key: "handleBackground",
+    value: function handleBackground(e, color, locked) {
+      if (e.target.id != "xlsx_table") {
+        var xlsx_table = document.getElementById("xlsx_table");
+        var xlsx_column = e.target.id.substring(11).replace(/[0-9]/g, "");
+        var tr = xlsx_table.children[0].children;
+        for (var i = 0; i < tr.length; i++) {
+          var td = tr[i].children;
+          for (var x = 0; x < td.length; x++) {
+            if (td[x].style.backgroundColor != "rgb(221, 221, 221)") {
+              if (td[x].id.substring(11).replace(/[0-9]/g, "") == xlsx_column) {
+                td[x].style.backgroundColor = color;
+              }
+            }
+          }
+        }
+      }
+    }
+  }, {
+    key: "handleClick",
+    value: function handleClick(event) {
+      if (event.target.id != "xlsx_table" && this.state.column.some(function (some) {
+        return some == null;
+      })) {
+        var xlsx_column = event.target.id.substring(11).replace(/[0-9]/g, "");
+        if (!this.state.column.some(function (some) {
+          return some == xlsx_column;
+        })) {
+          var column = this.state.column;
+          column[column.findIndex(function (find) {
+            return find == null;
+          })] = xlsx_column;
+          this.setState({
+            column: column
+          });
+          this.handleBackground(event, "#DDD", true);
+        }
+      }
+    }
+  }, {
+    key: "titleChange",
+    value: function titleChange(e) {
+      this.setState({
+        title: e.target.value
+      });
+    }
+  }, {
+    key: "render",
+    value: function render() {
+      var _this7 = this;
+
+      return React.createElement(
+        "div",
+        null,
+        React.createElement(
+          "form",
+          { onSubmit: this.handleSubmit },
+          React.createElement("input", {
+            type: "text",
+            placeholder: "\u0E0A\u0E37\u0E48\u0E2D\u0E02\u0E49\u0E2D\u0E2A\u0E2D\u0E1A",
+            required: true,
+            className: "Input",
+            style: { width: "100%" },
+            onChange: this.titleChange,
+            value: this.state.title
+          }),
+          React.createElement("br", null),
+          React.createElement("br", null),
+          React.createElement(
+            "select",
+            {
+              onChange: this.handleSheetChange,
+              className: "Input",
+              style: {
+                width: "100%",
+                backgroundColor: "white",
+                marginBottom: "10px"
+              }
+            },
+            this.props.workbook.SheetNames.map(function (map) {
+              return React.createElement(
+                "option",
+                null,
+                map
+              );
+            })
+          ),
+          React.createElement("div", {
+            onClick: this.handleClick,
+            onMouseOver: function onMouseOver() {
+              return _this7.handleBackground(event, "#CCC", false);
+            },
+            onMouseOut: function onMouseOut() {
+              return _this7.handleBackground(event, "#FFF", false);
+            },
+            className: "xlsx_table_container",
+            dangerouslySetInnerHTML: {
+              __html: XLSX.utils.sheet_to_html(this.props.workbook.Sheets[this.state.sheet], {
+                id: "xlsx_table"
+              })
+            }
+          }),
+          React.createElement(
+            "div",
+            { style: { display: "none" } },
+            setTimeout(function () {
+              document.querySelectorAll("[id^='xlsx_table-M']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+              document.querySelectorAll("[id^='xlsx_table-L']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+              document.querySelectorAll("[id^='xlsx_table-K']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+              document.querySelectorAll("[id^='xlsx_table-J']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+              document.querySelectorAll("[id^='xlsx_table-I']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+              document.querySelectorAll("[id^='xlsx_table-H']").forEach(function (each, index) {
+                if (index > 0) {
+                  each.innerHTML.search(/^<img/) != 0 && each.innerHTML != "" ? each.innerHTML = "<img style=\"width: 100px; height: 50px; object-fit: contain;\" src=\"" + each.innerHTML + "\" />" : each.innerHTML;
+                }
+              });
+            }, 1000),
+            "}"
+          ),
+          React.createElement("br", null),
+          this.state.column.some(function (some) {
+            return some == null;
+          }) ? React.createElement(
+            "span",
+            null,
+            "กรุณาเลือกคอลัมน์ - " + this.column[this.state.column.findIndex(function (find) {
+              return find == null;
+            })],
+            React.createElement("br", null),
+            React.createElement("br", null)
+          ) : "",
+          React.createElement(
+            "button",
+            {
+              onClick: function onClick() {
+                return _this7.props.handleDialog.close();
+              },
+              className: "Button"
+            },
+            "\u0E22\u0E01\u0E40\u0E25\u0E34\u0E01"
+          ),
+          React.createElement(
+            "button",
+            {
+              type: "submit",
+              style: { marginLeft: "10px" },
+              className: (this.state.column.every(function (every) {
+                return every != null;
+              }) ? "" : "Disabled") + " Button Primary"
+            },
+            "\u0E1A\u0E31\u0E19\u0E17\u0E36\u0E01"
+          )
+        )
+      );
+    }
+  }]);
+
+  return TableXLSX;
+}(React.Component);
+
+var QuestionDelete = function (_React$Component3) {
+  _inherits(QuestionDelete, _React$Component3);
 
   function QuestionDelete(props) {
     _classCallCheck(this, QuestionDelete);
 
-    var _this4 = _possibleConstructorReturn(this, (QuestionDelete.__proto__ || Object.getPrototypeOf(QuestionDelete)).call(this, props));
+    var _this8 = _possibleConstructorReturn(this, (QuestionDelete.__proto__ || Object.getPrototypeOf(QuestionDelete)).call(this, props));
 
-    _this4.state = {
+    _this8.state = {
       loading: false
     };
 
-    _this4.data = Object.assign({}, _this4.props.body);
-    _this4.deleteProc = _this4.deleteProc.bind(_this4);
-    return _this4;
+    _this8.data = Object.assign({}, _this8.props.body);
+    _this8.deleteProc = _this8.deleteProc.bind(_this8);
+    return _this8;
   }
 
   _createClass(QuestionDelete, [{
     key: "deleteProc",
     value: function deleteProc() {
-      var _this5 = this;
+      var _this9 = this;
 
       delete this.data[this.props.title];
 
@@ -155,15 +459,15 @@ var QuestionDelete = function (_React$Component2) {
 
       driveUpdate("question.json", this.data).then(function (res) {
         driveGet("result.json").then(function (res) {
-          console.log(res, _this5.props.title);
+          console.log(res, _this9.props.title);
           var finalResult = res;
-          if (finalResult != false && finalResult[_this5.props.title] && Object.keys(finalResult).length > 0) {
-            delete finalResult[_this5.props.title];
+          if (finalResult != false && finalResult[_this9.props.title] && Object.keys(finalResult).length > 0) {
+            delete finalResult[_this9.props.title];
             driveUpdate("result.json", finalResult).then(function (res) {
-              _this5.props.handleDialog.close();
+              _this9.props.handleDialog.close();
             });
           } else {
-            _this5.props.handleDialog.close();
+            _this9.props.handleDialog.close();
           }
         });
       });
@@ -171,7 +475,7 @@ var QuestionDelete = function (_React$Component2) {
   }, {
     key: "render",
     value: function render() {
-      var _this6 = this;
+      var _this10 = this;
 
       return !this.state.loading ? React.createElement(
         "div",
@@ -187,7 +491,7 @@ var QuestionDelete = function (_React$Component2) {
           "button",
           {
             onClick: function onClick() {
-              return _this6.props.handleDialog.close();
+              return _this10.props.handleDialog.close();
             },
             style: { marginRight: "10px" },
             className: "Button"
@@ -210,26 +514,26 @@ var QuestionDelete = function (_React$Component2) {
   return QuestionDelete;
 }(React.Component);
 
-export var QuestionPage = function (_React$Component3) {
-  _inherits(QuestionPage, _React$Component3);
+export var QuestionPage = function (_React$Component4) {
+  _inherits(QuestionPage, _React$Component4);
 
   function QuestionPage(props) {
     _classCallCheck(this, QuestionPage);
 
-    var _this7 = _possibleConstructorReturn(this, (QuestionPage.__proto__ || Object.getPrototypeOf(QuestionPage)).call(this, props));
+    var _this11 = _possibleConstructorReturn(this, (QuestionPage.__proto__ || Object.getPrototypeOf(QuestionPage)).call(this, props));
 
-    _this7.state = {
+    _this11.state = {
       data: ""
     };
 
-    _this7.handleUpdate = _this7.handleUpdate.bind(_this7);
-    return _this7;
+    _this11.handleUpdate = _this11.handleUpdate.bind(_this11);
+    return _this11;
   }
 
   _createClass(QuestionPage, [{
     key: "fetchData",
     value: function fetchData() {
-      var _this8 = this;
+      var _this12 = this;
 
       this.props.handleDialog.open(React.createElement(
         "div",
@@ -238,8 +542,8 @@ export var QuestionPage = function (_React$Component3) {
       ));
 
       driveGet("question.json").then(function (res) {
-        _this8.setState({ data: res });
-        _this8.props.handleDialog.close();
+        _this12.setState({ data: res });
+        _this12.props.handleDialog.close();
       });
     }
   }, {
@@ -255,7 +559,7 @@ export var QuestionPage = function (_React$Component3) {
   }, {
     key: "render",
     value: function render() {
-      var _this9 = this;
+      var _this13 = this;
 
       return React.createElement(
         "div",
@@ -266,9 +570,9 @@ export var QuestionPage = function (_React$Component3) {
             style: { display: "inline-block" },
             className: "Button Primary",
             onClick: function onClick() {
-              return _this9.props.handleDialog.open(React.createElement(CreateNewQuestion, {
-                handleDialog: _this9.props.handleDialog,
-                body: _this9.state.data
+              return _this13.props.handleDialog.open(React.createElement(CreateNewQuestion, {
+                handleDialog: _this13.props.handleDialog,
+                body: _this13.state.data
               }));
             }
           },
@@ -385,34 +689,34 @@ function QuestionListPage(props) {
   return result;
 }
 
-var QuestionEditPage = function (_React$Component4) {
-  _inherits(QuestionEditPage, _React$Component4);
+var QuestionEditPage = function (_React$Component5) {
+  _inherits(QuestionEditPage, _React$Component5);
 
   function QuestionEditPage(props) {
     _classCallCheck(this, QuestionEditPage);
 
-    var _this10 = _possibleConstructorReturn(this, (QuestionEditPage.__proto__ || Object.getPrototypeOf(QuestionEditPage)).call(this, props));
+    var _this14 = _possibleConstructorReturn(this, (QuestionEditPage.__proto__ || Object.getPrototypeOf(QuestionEditPage)).call(this, props));
 
-    _this10.state = {
-      data: _this10.props.data[_this10.props.title]
+    _this14.state = {
+      data: _this14.props.data[_this14.props.title]
     };
 
-    _this10.data = Object.assign({}, _this10.props.data);
-    _this10.handleAnswerChange = _this10.handleAnswerChange.bind(_this10);
-    _this10.handleTitleChange = _this10.handleTitleChange.bind(_this10);
-    _this10.handleTab = _this10.handleTab.bind(_this10);
-    _this10.addQuestion = _this10.addQuestion.bind(_this10);
-    _this10.handleCorrect = _this10.handleCorrect.bind(_this10);
-    _this10.handleDeleteQuestion = _this10.handleDeleteQuestion.bind(_this10);
-    _this10.handleSubmit = _this10.handleSubmit.bind(_this10);
-    _this10.addFile = _this10.addFile.bind(_this10);
-    return _this10;
+    _this14.data = Object.assign({}, _this14.props.data);
+    _this14.handleAnswerChange = _this14.handleAnswerChange.bind(_this14);
+    _this14.handleTitleChange = _this14.handleTitleChange.bind(_this14);
+    _this14.handleTab = _this14.handleTab.bind(_this14);
+    _this14.addQuestion = _this14.addQuestion.bind(_this14);
+    _this14.handleCorrect = _this14.handleCorrect.bind(_this14);
+    _this14.handleDeleteQuestion = _this14.handleDeleteQuestion.bind(_this14);
+    _this14.handleSubmit = _this14.handleSubmit.bind(_this14);
+    _this14.addFile = _this14.addFile.bind(_this14);
+    return _this14;
   }
 
   _createClass(QuestionEditPage, [{
     key: "handleSubmit",
     value: function handleSubmit() {
-      var _this11 = this;
+      var _this15 = this;
 
       this.props.handleDialog.open(React.createElement(
         "div",
@@ -424,7 +728,7 @@ var QuestionEditPage = function (_React$Component4) {
         writable: true
       });
       driveUpdate("question.json", this.data).then(function (res) {
-        _this11.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this11.props.handleDialog }));
+        _this15.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this15.props.handleDialog }));
       });
     }
   }, {
@@ -494,17 +798,17 @@ var QuestionEditPage = function (_React$Component4) {
   }, {
     key: "addFile",
     value: function addFile(event, question_no, choice) {
-      var _this12 = this;
+      var _this16 = this;
 
       var reader = new FileReader();
       reader.onload = function (e) {
-        var thisQuestion = Object.assign({}, _this12.state.data);
+        var thisQuestion = Object.assign({}, _this16.state.data);
         if (choice) {
           thisQuestion[question_no]["choice_img"][choice] = e.target.result;
         } else {
           thisQuestion[question_no]["question_img"] = e.target.result;
         }
-        _this12.setState({
+        _this16.setState({
           data: thisQuestion
         });
       };
@@ -513,7 +817,7 @@ var QuestionEditPage = function (_React$Component4) {
   }, {
     key: "render",
     value: function render() {
-      var _this13 = this;
+      var _this17 = this;
 
       var examName = Object.keys(this.state.data);
       return React.createElement(
@@ -549,10 +853,10 @@ var QuestionEditPage = function (_React$Component4) {
             "div",
             {
               onClick: function onClick() {
-                if (_this13.props.data[_this13.props.title] != _this13.state.data) {
-                  _this13.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this13.props.handleDialog }));
+                if (_this17.props.data[_this17.props.title] != _this17.state.data) {
+                  _this17.props.handleDialog.open(React.createElement(UnsaveExitConfirm, { handleDialog: _this17.props.handleDialog }));
                 } else {
-                  _this13.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this13.props.handleDialog }));
+                  _this17.props.handleDialog.close(React.createElement(QuestionPage, { handleDialog: _this17.props.handleDialog }));
                 }
               },
               style: { marginRight: 8, marginTop: "-5px", borderRadius: 2 },
@@ -562,7 +866,7 @@ var QuestionEditPage = function (_React$Component4) {
           )
         ),
         examName.map(function (question_no) {
-          var question = _this13.state.data[question_no];
+          var question = _this17.state.data[question_no];
           return React.createElement(
             "div",
             { className: "dataBorder", key: question_no },
@@ -580,7 +884,7 @@ var QuestionEditPage = function (_React$Component4) {
                 className: "questionTitleInput",
                 onChange: function onChange() {
                   QuestionEditPage.resizeTextarea(event);
-                  _this13.handleTitleChange(question_no, event);
+                  _this17.handleTitleChange(question_no, event);
                 },
                 onFocus: function onFocus() {
                   QuestionEditPage.resizeTextarea(event);
@@ -593,7 +897,7 @@ var QuestionEditPage = function (_React$Component4) {
                 type: "file",
                 id: "questionImg" + question_no,
                 onInput: function onInput() {
-                  return _this13.addFile(event, question_no);
+                  return _this17.addFile(event, question_no);
                 },
                 style: { display: "none" }
               }),
@@ -604,9 +908,9 @@ var QuestionEditPage = function (_React$Component4) {
                     if (question["question_img"] == "") {
                       document.getElementById("questionImg" + question_no).click();
                     } else {
-                      var thisQuestion = Object.assign({}, _this13.state.data);
+                      var thisQuestion = Object.assign({}, _this17.state.data);
                       thisQuestion[question_no]["question_img"] = "";
-                      _this13.setState({
+                      _this17.setState({
                         data: thisQuestion
                       });
                     }
@@ -636,7 +940,7 @@ var QuestionEditPage = function (_React$Component4) {
                 "div",
                 {
                   onClick: function onClick() {
-                    return _this13.handleDeleteQuestion(question_no);
+                    return _this17.handleDeleteQuestion(question_no);
                   },
                   className: "Button Danger OperateButton"
                 },
@@ -648,14 +952,14 @@ var QuestionEditPage = function (_React$Component4) {
               )
             ),
             React.createElement(EditAnswer, {
-              handleCorrect: _this13.handleCorrect,
+              handleCorrect: _this17.handleCorrect,
               question: question,
               question_no: question_no,
-              handleTab: _this13.handleTab,
-              handleChange: _this13.handleAnswerChange,
-              addFile: _this13.addFile,
-              data: _this13.state.data,
-              removeImg: _this13.setState.bind(_this13)
+              handleTab: _this17.handleTab,
+              handleChange: _this17.handleAnswerChange,
+              addFile: _this17.addFile,
+              data: _this17.state.data,
+              removeImg: _this17.setState.bind(_this17)
             })
           );
         }),
