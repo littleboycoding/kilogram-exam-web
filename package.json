@@ -23,6 +23,6 @@
     "googleapis": "^44.0.0"
   },
   "devDependencies": {
-    "electron": "^6.0.12"
+    "electron": "^15.5.5"
   }
 }
